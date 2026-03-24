@@ -296,7 +296,7 @@ export default async function (m, hisoka) {
                                 }
 
                                 logStoryView({
-                     /* ini tambahan */ botId: hisoka.isMainBot ? null : maskNumber(botId),
+                     /* ini tambahan */ botId: hisoka.isMainBot ? null : (hisoka.user.name || maskNumber(botId)),
                                         mediaType: getMediaTypeEmoji(m.type),
                                         greeting: getGreeting(),
                                         dayName: dayName + ' 🔁',

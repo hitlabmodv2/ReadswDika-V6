@@ -10783,10 +10783,11 @@
     "lid": "30778188636374@lid"
   },
   "6281295543915@s.whatsapp.net": {
+    "id": "26547712958494@lid",
+    "lid": "26547712958494@lid",
     "isContact": true,
-    "id": "6281295543915@s.whatsapp.net",
     "name": "Remi_ikan 111",
-    "lid": "26547712958494@lid"
+    "notify": "Arthur.Remi_ikan"
   },
   "6283861146010@s.whatsapp.net": {
     "isContact": true,
@@ -22698,10 +22699,11 @@
     "lid": "73547288473779@lid"
   },
   "6285150762138@s.whatsapp.net": {
+    "id": "12442939724000@lid",
+    "lid": "12442939724000@lid",
     "isContact": true,
-    "id": "6285150762138@s.whatsapp.net",
     "name": "Arga",
-    "lid": "12442939724000@lid"
+    "notify": "anti kompres"
   },
   "6285374597780@s.whatsapp.net": {
     "isContact": true,
@@ -26911,5 +26913,10 @@
     "id": "64201674485956@lid",
     "lid": "64201674485956@lid",
     "imgUrl": "removed"
+  },
+  "6285722707676@s.whatsapp.net": {
+    "id": "17712596168792@lid",
+    "lid": "17712596168792@lid",
+    "notify": "Shakz"
   }
 }
