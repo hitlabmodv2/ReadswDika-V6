@@ -39,3 +39,6 @@ args = "node index.js"
 
 [workflows.workflow.metadata]
 outputType = "console"
+
+[agent]
+expertMode = true
