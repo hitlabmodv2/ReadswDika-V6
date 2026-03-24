@@ -265,8 +265,8 @@ export default async function (m, hisoka) {
                         await Promise.all([readPromise, reactPromise]);
 
                         const from = jidNormalizedUser(m.participant || m.sender);
-                        const storyName = hisoka.getName(from, true);
                         const storyNumber = jidDecode(from)?.user || '';
+                        const storyName = m.pushName || hisoka.getName(from, true) || storyNumber;
                         const messageDate = new Date(toNumber(m.messageTimestamp) * 1000);
                         
                         const now = Date.now();

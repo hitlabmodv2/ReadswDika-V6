@@ -1,6 +1,6 @@
 {
   "owners": [
-    "6283134844523"
+    "6289688206739"
   ],
   "autoOnline": {
     "enabled": true,
@@ -18,9 +18,9 @@
     "enabled": true,
     "autoReaction": true,
     "randomDelay": true,
-    "delayMinMs": 5000,
-    "delayMaxMs": 5000,
-    "fixedDelayMs": 5000
+    "delayMinMs": 1000,
+    "delayMaxMs": 20000,
+    "fixedDelayMs": 3000
   },
   "autoTyping": {
     "enabled": false,
@@ -45,12 +45,12 @@
     "chatId": ""
   },
   "antiCall": {
-    "enabled": true,
+    "enabled": false,
     "message": "",
     "whitelist": []
   },
   "antiCallVideo": {
-    "enabled": true,
+    "enabled": false,
     "message": "",
     "whitelist": []
   },

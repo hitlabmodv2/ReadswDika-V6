@@ -1,0 +1,39 @@
+{
+  "120363192554714254@g.us": {
+    "id": "120363192554714254@g.us",
+    "addressingMode": "lid",
+    "subject": "Private Botz Tempat uji coba fitur",
+    "subjectTime": 1740819170,
+    "size": 3,
+    "creation": 1702880330,
+    "desc": "https://chat.whatsapp.com/Gax4X7n2Fcy8SiLBwqWYU7 😀",
+    "descId": "4722A4748DC201F1",
+    "descOwner": "97968623505429@lid",
+    "descOwnerPn": "6289667923162@s.whatsapp.net",
+    "descTime": 1774189890,
+    "restrict": true,
+    "announce": false,
+    "isCommunity": false,
+    "isCommunityAnnounce": false,
+    "joinApprovalMode": false,
+    "memberAddMode": true,
+    "participants": [
+      {
+        "id": "81582920577063@lid",
+        "phoneNumber": "6289688206739@s.whatsapp.net",
+        "admin": null
+      },
+      {
+        "id": "274255723921630@lid",
+        "phoneNumber": "6289681008411@s.whatsapp.net",
+        "admin": "admin"
+      },
+      {
+        "id": "97968623505429@lid",
+        "phoneNumber": "6289667923162@s.whatsapp.net",
+        "admin": "admin"
+      }
+    ],
+    "ephemeralDuration": 86400
+  }
+}
