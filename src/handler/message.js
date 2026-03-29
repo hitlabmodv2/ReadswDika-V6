@@ -3159,11 +3159,27 @@ infoText += `╰═════════════════════�
                                         await m.reply({ edit: loadingMsg.key, text: '✅ Berhasil! Mengirim media...' });
                                         
                                         for (let i = 0; i < mediaUrls.length; i++) {
-                                                const mediaUrl = mediaUrls[i];
+                                                const mediaItem = mediaUrls[i];
                                                 const isFirstMedia = i === 0;
                                                 
+                                                // Support both string URLs and object items {url, type}
+                                                const mediaUrl = typeof mediaItem === 'object' ? (mediaItem.url || mediaItem.src || mediaItem) : mediaItem;
+                                                
+                                                // Detect per-item type: check object type property, else check URL extension, else fall back to global isVideo
+                                                let itemIsVideo = isVideo;
+                                                if (typeof mediaItem === 'object' && mediaItem.type) {
+                                                        itemIsVideo = mediaItem.type === 'video' || mediaItem.type === 'GraphVideo';
+                                                } else {
+                                                        const urlStr = String(mediaUrl).toLowerCase().split('?')[0];
+                                                        if (urlStr.endsWith('.mp4') || urlStr.endsWith('.mov') || urlStr.endsWith('.webm')) {
+                                                                itemIsVideo = true;
+                                                        } else if (urlStr.endsWith('.jpg') || urlStr.endsWith('.jpeg') || urlStr.endsWith('.png') || urlStr.endsWith('.webp')) {
+                                                                itemIsVideo = false;
+                                                        }
+                                                }
+                                                
                                                 try {
-                                                        if (isVideo) {
+                                                        if (itemIsVideo) {
                                                                 await hisoka.sendMessage(m.from, {
                                                                         video: { url: mediaUrl },
                                                                         caption: isFirstMedia ? infoText : ''
