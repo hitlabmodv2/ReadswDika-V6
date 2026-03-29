@@ -22232,10 +22232,11 @@
     "lid": "195670120075300@lid"
   },
   "6282228431883@s.whatsapp.net": {
+    "id": "124507108991054@lid",
+    "lid": "124507108991054@lid",
     "isContact": true,
-    "id": "6282228431883@s.whatsapp.net",
     "name": "• Ikyy No Cure",
-    "lid": "124507108991054@lid"
+    "notify": "Ikyysigmax"
   },
   "6285720484260@s.whatsapp.net": {
     "isContact": true,
@@ -26893,5 +26894,10 @@
     "id": "212606631923@s.whatsapp.net",
     "name": "pushkontakkk 44",
     "lid": "253365153972298@lid"
+  },
+  "264965290213535@lid": {
+    "id": "264965290213535@lid",
+    "lid": "264965290213535@lid",
+    "imgUrl": "changed"
   }
 }
