@@ -1938,10 +1938,11 @@
     "lid": "15028191285299@lid"
   },
   "6285778517902@s.whatsapp.net": {
+    "id": "178701056626923@lid",
+    "lid": "178701056626923@lid",
     "isContact": true,
-    "id": "6285778517902@s.whatsapp.net",
     "name": "* Stephanie Floriska",
-    "lid": "178701056626923@lid"
+    "notify": "Stephanie Floriska"
   },
   "6283184854599@s.whatsapp.net": {
     "isContact": true,

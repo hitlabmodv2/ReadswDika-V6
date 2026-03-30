@@ -3826,16 +3826,53 @@ text += `╰═════════════════╯`;
                                         try { return fs.statSync(path.join(rootDir, i)).isFile(); } catch { return false; }
                                 });
 
+                                // Hitung isi tiap folder (file & subfolder langsung di dalamnya)
+                                function getFolderStats(dirPath) {
+                                        try {
+                                                const items = fs.readdirSync(dirPath, { withFileTypes: true });
+                                                const files = items.filter(i => i.isFile()).length;
+                                                const folders = items.filter(i => i.isDirectory()).length;
+                                                return { files, folders };
+                                        } catch { return { files: 0, folders: 0 }; }
+                                }
+
+                                const folderLines = includedFolders.map((f, i) => {
+                                        const isLast = i === includedFolders.length - 1;
+                                        const prefix = isLast ? '└─' : '├─';
+                                        const { files, folders } = getFolderStats(path.join(rootDir, f));
+                                        const detail = [
+                                                files ? `${files} file` : '',
+                                                folders ? `${folders} folder` : ''
+                                        ].filter(Boolean).join(', ') || 'kosong';
+                                        return `${prefix} 📂 *${f}/* → _${detail}_`;
+                                });
+
+                                const fileLines = includedFiles.map((f, i) => {
+                                        const isLast = i === includedFiles.length - 1;
+                                        const prefix = isLast ? '└─' : '├─';
+                                        return `${prefix} 📄 ${f}`;
+                                });
+
+                                // Reaction ⏳ dulu
+                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+
                                 await m.reply(
-                                        `⏳ *Memulai Backup Bot...*\n\n` +
-                                        `📁 *Folder disertakan (${includedFolders.length}):*\n` +
-                                        includedFolders.map(f => `  • ${f}/`).join('\n') +
-                                        `\n\n📄 *File disertakan (${includedFiles.length}):*\n` +
-                                        includedFiles.map(f => `  • ${f}`).join('\n') +
-                                        `\n\n🗂️ *Total file:* ${totalFiles} file\n` +
-                                        `\n🚫 *Dikecualikan:*\n` +
-                                        excludedItems.map(e => `  • ${e}`).join('\n') +
-                                        `\n\n_Sedang membuat zip, harap tunggu..._`
+                                        `╭─「 🗜️ *BACKUP BOT* 」\n` +
+                                        `│\n` +
+                                        `│ ⏳ _Sedang memproses backup..._\n` +
+                                        `│\n` +
+                                        `├─ 📁 *Folder (${includedFolders.length})*\n` +
+                                        folderLines.map(l => `│  ${l}`).join('\n') + '\n' +
+                                        `│\n` +
+                                        `├─ 📄 *File Root (${includedFiles.length})*\n` +
+                                        fileLines.map(l => `│  ${l}`).join('\n') + '\n' +
+                                        `│\n` +
+                                        `├─ 🗂️ *Total keseluruhan:* ${totalFiles} file\n` +
+                                        `│\n` +
+                                        `├─ 🚫 *Dikecualikan (${excludedItems.length}):*\n` +
+                                        `│  └─ ${excludedItems.join(', ')}\n` +
+                                        `│\n` +
+                                        `╰─ _Membuat zip, harap tunggu..._`
                                 );
 
                                 // Buat zip ke /tmp
@@ -3864,6 +3901,25 @@ text += `╰═════════════════╯`;
                                 const zipBuffer = fs.readFileSync(zipPath);
                                 const zipSizeMB = (zipBuffer.length / 1024 / 1024).toFixed(2);
 
+                                // Caption ringkas untuk dokumen zip
+                                const zipCaption =
+                                        `╭─「 📦 *BACKUP SELESAI* 」\n` +
+                                        `│\n` +
+                                        `├─ 🗜️ *File :* ${zipName}\n` +
+                                        `├─ 📏 *Ukuran :* ${zipSizeMB} MB\n` +
+                                        `├─ 🗂️ *Total :* ${totalFiles} file\n` +
+                                        `│\n` +
+                                        `├─ 📁 *Folder (${includedFolders.length})*\n` +
+                                        includedFolders.map(f => {
+                                                const { files, folders } = getFolderStats(path.join(rootDir, f));
+                                                const detail = [files ? `${files} file` : '', folders ? `${folders} folder` : ''].filter(Boolean).join(', ') || 'kosong';
+                                                return `│  └─ ${f}/ → ${detail}`;
+                                        }).join('\n') + '\n' +
+                                        `│\n` +
+                                        `├─ 🚫 *Exclude :* ${excludedItems.join(', ')}\n` +
+                                        `│\n` +
+                                        `╰─ 🕐 ${new Date().toLocaleString('id-ID')}`;
+
                                 // Kirim ke semua owner
                                 const sentTo = [];
                                 for (const ownerNum of owners) {
@@ -3873,15 +3929,7 @@ text += `╰═════════════════╯`;
                                                         document: zipBuffer,
                                                         fileName: zipName,
                                                         mimetype: 'application/zip',
-                                                        caption:
-                                                                `✅ *Backup Bot Berhasil*\n\n` +
-                                                                `📦 *File:* ${zipName}\n` +
-                                                                `📏 *Ukuran:* ${zipSizeMB} MB\n` +
-                                                                `🗂️ *Total File:* ${totalFiles} file\n` +
-                                                                `📁 *Folder (${includedFolders.length}):* ${includedFolders.map(f => f + '/').join(', ')}\n` +
-                                                                `📄 *File (${includedFiles.length}):* ${includedFiles.join(', ')}\n` +
-                                                                `🚫 *Dikecualikan:* ${excludedItems.join(', ')}\n` +
-                                                                `🕐 *Waktu:* ${new Date().toLocaleString('id-ID')}`,
+                                                        caption: zipCaption,
                                                 });
                                                 sentTo.push(ownerNum);
                                         } catch (e) {
@@ -3892,11 +3940,21 @@ text += `╰═════════════════╯`;
                                 // Hapus file zip tmp
                                 try { fs.unlinkSync(zipPath); } catch {}
 
+                                // Reaction ✅ selesai
+                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+
                                 await m.reply(
                                         sentTo.length
-                                        ? `✅ *Backup selesai!*\n\n📦 Ukuran: *${zipSizeMB} MB*\n🗂️ Total file: *${totalFiles}*\n\n📨 Terkirim ke *${sentTo.length}* owner:\n` +
-                                          sentTo.map((n, i) => `  ${i + 1}. ${n}`).join('\n')
-                                        : `⚠️ Zip dibuat tapi tidak ada owner yang bisa dikirim.`
+                                        ? `╭─「 ✅ *BACKUP BERHASIL* 」\n` +
+                                          `│\n` +
+                                          `├─ 📏 *Ukuran :* ${zipSizeMB} MB\n` +
+                                          `├─ 🗂️ *Total file :* ${totalFiles}\n` +
+                                          `│\n` +
+                                          `├─ 📨 *Terkirim ke ${sentTo.length} owner:*\n` +
+                                          sentTo.map((n, i) => `│  ${i + 1}. +${n}`).join('\n') + '\n' +
+                                          `│\n` +
+                                          `╰─ 🕐 ${new Date().toLocaleString('id-ID')}`
+                                        : `╭─「 ⚠️ *BACKUP* 」\n│\n├─ Zip dibuat tapi gagal kirim ke semua owner.\n╰─ Cek nomor owner di config.json`
                                 );
 
                                 logCommand(m, hisoka, 'backup');
