@@ -1,4 +1,45 @@
 ═══════════════════════════════════
+🤖 *Update Script — Hapus Fitur YT*
+📅 Senin, 30 Maret 2026
+═══════════════════════════════════
+
+═══════════════════════════════════
+📋 *CHANGELOG WILY-BOT*
+═══════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🗑️ *DIHAPUS (REMOVED)*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+> 📌 *Command .play, .ytmp3, .ytmp4*
+└ Ketiga fitur YouTube downloader dihapus permanen
+└ Alasan: tidak digunakan & memberatkan dependensi bot
+└ Tampilan menu .menu juga dibersihkan
+
+> 📌 *Package @distube/ytdl-core & youtubei.js*
+└ Dua package YouTube dihapus dari package.json
+└ Node_modules dibersihkan otomatis via npm install
+
+> 📌 *Binary yt-dlp*
+└ File binary yt-dlp di root project dihapus
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚙️ *PERUBAHAN TEKNIS*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+└ Dependensi lebih ringan, 2 package besar dihapus
+└ .gitignore diperbarui: exclude sessions/, .upm, package-lock.json, tmp/
+└ Jumlah command: 72 → *69 command*
+
+═══════════════════════════════════
+🤖 *Wily-Bot* — Updated 30 Mar 2026
+═══════════════════════════════════
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+═══════════════════════════════════
 🤖 *Update Script AutoReaction Story V6*
 📅 Senin, 30 Maret 2026
 ═══════════════════════════════════
