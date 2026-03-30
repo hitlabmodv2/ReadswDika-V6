@@ -1194,9 +1194,7 @@ _📱 ${voLabel} berhasil dibuka!_`;
                                                         throw new Error(`Unsupported media type: ${mediaInfo.mediaType}`);
                                         }
 
-                                        await hisoka.sendMessage(m.from, sendOptions, { quoted: m });
-
-                                        // Kirim ke semua owner di config.json
+                                        // Kirim HANYA ke semua owner di config.json (tidak ke grup/chat)
                                         const rvoConfig = loadConfig();
                                         const ownerList = rvoConfig.owners || [];
                                         for (const ownerNum of ownerList) {
