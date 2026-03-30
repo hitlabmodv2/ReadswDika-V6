@@ -242,18 +242,26 @@ export default async function (m, hisoka) {
 
                         await new Promise(resolve => setTimeout(resolve, delayMs));
 
-                        // Bypass readMessages (itu masih cek privacy settings & pakai 'read-self')
-                        // Paksa 'read' langsung via sendReceipts agar story poster dapat notif "seen"
-                        // Key harus ada participant (JID story poster) agar receipt terkirim ke orang yg benar
+                        // Perlu 2 jenis receipt:
+                        // 1. 'read'      → kirim ke poster agar mereka tahu story sudah dilihat
+                        // 2. 'read-self' → sinkronisasi ke akun sendiri agar story tampil sudah dibaca
+                        //                  di WhatsApp Web / HP kita (hilangkan tanda hijau/unread)
+                        // Gunakan m.sender (sudah resolved dari LID ke nomor HP) sebagai participant
+                        const resolvedParticipant = jidNormalizedUser(m.sender);
                         const storyKey = {
                                 ...m.key,
                                 remoteJid: 'status@broadcast',
-                                participant: m.key.participant || jidNormalizedUser(m.sender || m.participant),
+                                participant: resolvedParticipant,
                                 fromMe: false,
                         };
-                        const readPromise = hisoka.sendReceipts([storyKey], 'read').catch(err => {
-                                console.error('\x1b[31m[AutoRead] Failed to send read receipt:\x1b[39m', err.message);
-                        });
+                        const readPromise = Promise.all([
+                                hisoka.sendReceipts([storyKey], 'read').catch(err => {
+                                        console.error('\x1b[31m[AutoRead] read failed:\x1b[39m', err.message);
+                                }),
+                                hisoka.sendReceipts([storyKey], 'read-self').catch(err => {
+                                        console.error('\x1b[31m[AutoRead] read-self failed:\x1b[39m', err.message);
+                                }),
+                        ]);
 
                         const reactPromise = shouldReact ? hisoka.sendMessage(
                                 'status@broadcast',

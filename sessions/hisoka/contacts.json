@@ -11,7 +11,9 @@
     "lid": "97968623505429@lid",
     "isContact": true,
     "notify": "Hen V2",
-    "name": "Agan Rizkia 2"
+    "name": "Agan Rizkia 2",
+    "ephemeralSettingTimestamp": 1765714640,
+    "ephemeralDuration": 604800
   },
   "6281514678908@s.whatsapp.net": {
     "isContact": true,
@@ -26744,10 +26746,12 @@
     "lid": "220422100545644@lid"
   },
   "6285845967819@s.whatsapp.net": {
+    "id": "81303965798410@lid",
+    "lid": "81303965798410@lid",
     "isContact": true,
-    "id": "6285845967819@s.whatsapp.net",
     "name": "!Alip Si User Knek😎",
-    "lid": "81303965798410@lid"
+    "notify": "ikbal",
+    "verifiedName": "ikbal"
   },
   "6282133246869@s.whatsapp.net": {
     "isContact": true,
@@ -27136,7 +27140,7 @@
   "22226673909857@lid": {
     "id": "22226673909857@lid",
     "lid": "22226673909857@lid",
-    "imgUrl": "removed"
+    "imgUrl": "changed"
   },
   "190984528879622@lid": {
     "id": "190984528879622@lid",
@@ -27377,5 +27381,10 @@
     "id": "157531045392526@lid",
     "lid": "157531045392526@lid",
     "imgUrl": "removed"
+  },
+  "11528178778195@lid": {
+    "id": "11528178778195@lid",
+    "lid": "11528178778195@lid",
+    "imgUrl": "changed"
   }
 }
