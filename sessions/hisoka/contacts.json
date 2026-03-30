@@ -25086,10 +25086,12 @@
     "lid": "124051825643651@lid"
   },
   "6283111161657@s.whatsapp.net": {
+    "id": "41309716902084@lid",
+    "lid": "41309716902084@lid",
     "isContact": true,
-    "id": "6283111161657@s.whatsapp.net",
     "name": "Lynne~",
-    "lid": "41309716902084@lid"
+    "notify": "f",
+    "verifiedName": "f"
   },
   "6289508613017@s.whatsapp.net": {
     "isContact": true,
