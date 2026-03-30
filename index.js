@@ -403,7 +403,6 @@ async function main() {
                         }
 
                 }, intervalMs);
-                                        console.log(`\x1b[32m[AutoOnline]\x1b[39m Started - Mode: ONLINE - Interval: ${autoOnline.intervalSeconds || 30}s`);
                                 } else {
                                         hisoka.sendPresenceUpdate('unavailable');
 
@@ -419,7 +418,6 @@ async function main() {
                         }
 
                 }, intervalMs);
-                                        console.log(`\x1b[33m[AutoOffline]\x1b[39m Started - Mode: OFFLINE - Interval: ${autoOnline.intervalSeconds || 30}s`);
                                 }
                         };
 
