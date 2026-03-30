@@ -700,6 +700,7 @@ ${readMore}
 │ ∘ .listowner
 │ ∘ .addowner
 │ ∘ .delowner
+│ ∘ .backup
 ╰───────────────╯
 
 ╭───〔 *Advanced* 〕
@@ -3774,6 +3775,130 @@ text += `╰═════════════════╯`;
                                         number = '62' + number.slice(1);
 
                                 await stopJadibot(number, (text) => m.reply(text));
+                        }
+                                break;
+
+                        case 'backup': {
+                                if (!isMainBot(hisoka)) return;
+                                if (!m.isOwner) return;
+
+                                const archiver = (await import('archiver')).default;
+                                const config = loadConfig();
+                                const owners = config.owners || [];
+
+                                const EXCLUDED = new Set([
+                                        'attached_assets', '.git', '.agents', 'sessions',
+                                        '.upm', 'node_modules', 'package-lock.json'
+                                ]);
+
+                                const rootDir = process.cwd();
+
+                                // Kumpulkan semua item top-level yang akan di-backup
+                                const allItems = fs.readdirSync(rootDir);
+                                const includedItems = allItems.filter(i => !EXCLUDED.has(i));
+                                const excludedItems = allItems.filter(i => EXCLUDED.has(i));
+
+                                // Hitung total file rekursif (real-time)
+                                function countFilesRecursive(dir) {
+                                        let count = 0;
+                                        try {
+                                                const items = fs.readdirSync(dir, { withFileTypes: true });
+                                                for (const item of items) {
+                                                        if (EXCLUDED.has(item.name)) continue;
+                                                        if (item.isDirectory()) {
+                                                                count += countFilesRecursive(path.join(dir, item.name));
+                                                        } else {
+                                                                count++;
+                                                        }
+                                                }
+                                        } catch {}
+                                        return count;
+                                }
+
+                                const totalFiles = countFilesRecursive(rootDir);
+
+                                // Pisahkan folder dan file untuk tampilan
+                                const includedFolders = includedItems.filter(i => {
+                                        try { return fs.statSync(path.join(rootDir, i)).isDirectory(); } catch { return false; }
+                                });
+                                const includedFiles = includedItems.filter(i => {
+                                        try { return fs.statSync(path.join(rootDir, i)).isFile(); } catch { return false; }
+                                });
+
+                                await m.reply(
+                                        `⏳ *Memulai Backup Bot...*\n\n` +
+                                        `📁 *Folder disertakan (${includedFolders.length}):*\n` +
+                                        includedFolders.map(f => `  • ${f}/`).join('\n') +
+                                        `\n\n📄 *File disertakan (${includedFiles.length}):*\n` +
+                                        includedFiles.map(f => `  • ${f}`).join('\n') +
+                                        `\n\n🗂️ *Total file:* ${totalFiles} file\n` +
+                                        `\n🚫 *Dikecualikan:*\n` +
+                                        excludedItems.map(e => `  • ${e}`).join('\n') +
+                                        `\n\n_Sedang membuat zip, harap tunggu..._`
+                                );
+
+                                // Buat zip ke /tmp
+                                const zipName = `backup_bot_${Date.now()}.zip`;
+                                const zipPath = path.join('/tmp', zipName);
+                                const output = fs.createWriteStream(zipPath);
+                                const archive = archiver('zip', { zlib: { level: 9 } });
+
+                                await new Promise((resolve, reject) => {
+                                        output.on('close', resolve);
+                                        archive.on('error', reject);
+                                        archive.pipe(output);
+
+                                        for (const item of includedItems) {
+                                                const fullPath = path.join(rootDir, item);
+                                                const stat = fs.statSync(fullPath);
+                                                if (stat.isDirectory()) {
+                                                        archive.directory(fullPath, item);
+                                                } else {
+                                                        archive.file(fullPath, { name: item });
+                                                }
+                                        }
+                                        archive.finalize();
+                                });
+
+                                const zipBuffer = fs.readFileSync(zipPath);
+                                const zipSizeMB = (zipBuffer.length / 1024 / 1024).toFixed(2);
+
+                                // Kirim ke semua owner
+                                const sentTo = [];
+                                for (const ownerNum of owners) {
+                                        const ownerJid = `${ownerNum}@s.whatsapp.net`;
+                                        try {
+                                                await hisoka.sendMessage(ownerJid, {
+                                                        document: zipBuffer,
+                                                        fileName: zipName,
+                                                        mimetype: 'application/zip',
+                                                        caption:
+                                                                `✅ *Backup Bot Berhasil*\n\n` +
+                                                                `📦 *File:* ${zipName}\n` +
+                                                                `📏 *Ukuran:* ${zipSizeMB} MB\n` +
+                                                                `🗂️ *Total File:* ${totalFiles} file\n` +
+                                                                `📁 *Folder (${includedFolders.length}):* ${includedFolders.map(f => f + '/').join(', ')}\n` +
+                                                                `📄 *File (${includedFiles.length}):* ${includedFiles.join(', ')}\n` +
+                                                                `🚫 *Dikecualikan:* ${excludedItems.join(', ')}\n` +
+                                                                `🕐 *Waktu:* ${new Date().toLocaleString('id-ID')}`,
+                                                });
+                                                sentTo.push(ownerNum);
+                                        } catch (e) {
+                                                console.error('[Backup] Gagal kirim ke', ownerNum, e.message);
+                                        }
+                                }
+
+                                // Hapus file zip tmp
+                                try { fs.unlinkSync(zipPath); } catch {}
+
+                                await m.reply(
+                                        sentTo.length
+                                        ? `✅ *Backup selesai!*\n\n📦 Ukuran: *${zipSizeMB} MB*\n🗂️ Total file: *${totalFiles}*\n\n📨 Terkirim ke *${sentTo.length}* owner:\n` +
+                                          sentTo.map((n, i) => `  ${i + 1}. ${n}`).join('\n')
+                                        : `⚠️ Zip dibuat tapi tidak ada owner yang bisa dikirim.`
+                                );
+
+                                logCommand(m, hisoka, 'backup');
                         }
                                 break;
 
