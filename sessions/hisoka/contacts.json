@@ -19172,9 +19172,9 @@
     "lid": "260833632321656@lid"
   },
   "6289688206739@s.whatsapp.net": {
-    "isContact": true,
-    "id": "6289688206739@s.whatsapp.net",
+    "id": "81582920577063@lid",
     "lid": "81582920577063@lid",
+    "isContact": true,
     "name": "Agan Rizkia",
     "notify": "Wily",
     "ephemeralSettingTimestamp": 1765778951,
@@ -27854,5 +27854,10 @@
     "id": "6051994828936@lid",
     "lid": "6051994828936@lid",
     "notify": "abian - หล่อ"
+  },
+  "95434911531184@lid": {
+    "id": "95434911531184@lid",
+    "lid": "95434911531184@lid",
+    "imgUrl": "changed"
   }
 }

@@ -1090,21 +1090,23 @@ text += `╰═════════════════════╯`;
 
                                         // Kalau tidak ada di cache, download live dari WA
                                         if (!buffer) {
-                                                const messageKey = {
-                                                        remoteJid: m.from,
-                                                        fromMe: quotedParticipant ? false : (contextInfo?.fromMe || false),
-                                                        id: quotedStanzaId,
-                                                        participant: isJidGroup(m.from) ? quotedParticipant : undefined
-                                                };
-
                                                 let downloadMessage = {};
                                                 downloadMessage[mediaInfo.mediaType] = mediaInfo.mediaMessage;
 
+                                                const dlMsg = m.quoted?.key
+                                                        ? { ...m.quoted, message: downloadMessage }
+                                                        : {
+                                                                key: {
+                                                                        remoteJid: m.from,
+                                                                        fromMe: quotedParticipant ? false : (contextInfo?.fromMe ?? false),
+                                                                        id: quotedStanzaId,
+                                                                        ...(isJidGroup(m.from) && quotedParticipant ? { participant: quotedParticipant } : {})
+                                                                },
+                                                                message: downloadMessage
+                                                        };
+
                                                 buffer = await downloadMediaMessage(
-                                                        {
-                                                                message: downloadMessage,
-                                                                key: messageKey
-                                                        },
+                                                        dlMsg,
                                                         'buffer',
                                                         {},
                                                         {
