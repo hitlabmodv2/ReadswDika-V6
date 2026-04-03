@@ -9804,10 +9804,11 @@
     "lid": "87892311461961@lid"
   },
   "6289678522775@s.whatsapp.net": {
+    "id": "193020829909081@lid",
+    "lid": "193020829909081@lid",
     "isContact": true,
-    "id": "6289678522775@s.whatsapp.net",
     "name": "! Zacky Ariansyah",
-    "lid": "193020829909081@lid"
+    "notify": "Zacky Ariansyah"
   },
   "6285971759213@s.whatsapp.net": {
     "isContact": true,
@@ -18036,10 +18037,11 @@
     "lid": "128969596784660@lid"
   },
   "6282252134009@s.whatsapp.net": {
+    "id": "76790290767977@lid",
+    "lid": "76790290767977@lid",
     "isContact": true,
-    "id": "6282252134009@s.whatsapp.net",
     "name": "√ Elisa",
-    "lid": "76790290767977@lid"
+    "notify": "NISKI | RESSKOVV"
   },
   "6282154683364@s.whatsapp.net": {
     "isContact": true,
@@ -26674,5 +26676,25 @@
     "id": "97968623505429@lid",
     "lid": "97968623505429@lid",
     "notify": "Hen V2"
+  },
+  "22226673909857@lid": {
+    "id": "22226673909857@lid",
+    "lid": "22226673909857@lid",
+    "imgUrl": "changed"
+  },
+  "17106854748264@lid": {
+    "id": "17106854748264@lid",
+    "lid": "17106854748264@lid",
+    "imgUrl": "changed"
+  },
+  "93943836463341@lid": {
+    "id": "93943836463341@lid",
+    "lid": "93943836463341@lid",
+    "imgUrl": "changed"
+  },
+  "150749308842187@lid": {
+    "id": "150749308842187@lid",
+    "lid": "150749308842187@lid",
+    "imgUrl": "removed"
   }
 }

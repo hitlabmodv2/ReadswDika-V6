@@ -547,6 +547,9 @@ ${readMore}
 │ ∘ .tt
 │ ∘ .ig
 │ ∘ .fb
+│ ∘ .play
+│ ∘ .ytmp3
+│ ∘ .ytmp4
 ╰───────────────╯
 
 ╭───〔 *Owner* 〕
@@ -3537,6 +3540,229 @@ text += `╰═════════════════╯`;
                         }
                                 break;
                         
+
+                        case 'play': {
+                                try {
+                                        if (!query) {
+                                                await m.reply('❌ Masukkan judul lagu!\n\nContoh: .play shape of you ed sheeran');
+                                                break;
+                                        }
+
+                                        const loadingMsg = await m.reply('🔍 Mencari lagu...');
+
+                                        const yts = (await import('yt-search')).default;
+                                        const searchResult = await yts(query.trim());
+
+                                        if (!searchResult || !searchResult.videos || searchResult.videos.length === 0) {
+                                                await m.reply({ edit: loadingMsg.key, text: '❌ Lagu tidak ditemukan!' });
+                                                break;
+                                        }
+
+                                        const video = searchResult.videos[0];
+
+                                        if (video.seconds > 600) {
+                                                await m.reply({ edit: loadingMsg.key, text: `❌ Durasi terlalu panjang! (${video.duration.timestamp})\nMaksimal 10 menit.` });
+                                                break;
+                                        }
+
+                                        await m.reply({ edit: loadingMsg.key, text: `🎵 Ditemukan: *${video.title}*\n⏱️ Durasi: ${video.duration.timestamp}\n⬇️ Sedang mengunduh audio...` });
+
+                                        const ytdlpBin = path.join(process.cwd(), 'tmp', 'yt-dlp');
+                                        const tmpId = Date.now();
+                                        const tmpFile = path.join(process.cwd(), 'tmp', `play_${tmpId}.mp3`);
+                                        const tmpTemplate = path.join(process.cwd(), 'tmp', `play_${tmpId}.%(ext)s`);
+
+                                        await new Promise((resolve, reject) => {
+                                                const cmd = `"${ytdlpBin}" --no-playlist -x --audio-format mp3 --audio-quality 5 -o "${tmpTemplate}" "${video.url}"`;
+                                                exec(cmd, { timeout: 120000 }, (err, stdout, stderr) => {
+                                                        if (err) return reject(new Error(stderr || err.message));
+                                                        resolve();
+                                                });
+                                        });
+
+                                        const audioBuffer = fs.readFileSync(tmpFile);
+
+                                        let playInfo = `╭═══ *🎵 PLAY MUSIC* ═══╮\n`;
+                                        playInfo += `│ 📌 ${video.title}\n`;
+                                        playInfo += `│ ⏱️ ${video.duration.timestamp}\n`;
+                                        if (video.views) playInfo += `│ 👁️ ${video.views.toLocaleString('id-ID')} views\n`;
+                                        if (video.author?.name) playInfo += `│ 👤 ${video.author.name}\n`;
+                                        playInfo += `╰═══════════════════╯`;
+
+                                        await hisoka.sendMessage(m.from, {
+                                                audio: audioBuffer,
+                                                mimetype: 'audio/mpeg',
+                                                fileName: `${video.title.replace(/[^\w\s]/gi, '')}.mp3`,
+                                                ptt: false
+                                        }, { quoted: m });
+
+                                        await m.reply(playInfo);
+
+                                        try { fs.unlinkSync(tmpFile); } catch (_) {}
+
+                                        logCommand(m, hisoka, 'play');
+                                } catch (error) {
+                                        console.error('\x1b[31m[Play] Error:\x1b[39m', error.message);
+                                        await m.reply(`❌ Gagal mengunduh lagu: ${error.message?.substring(0, 200)}`);
+                                }
+                                break;
+                        }
+
+                        case 'ytmp3': {
+                                try {
+                                        if (!query) {
+                                                await m.reply('❌ Masukkan link YouTube!\n\nContoh: .ytmp3 https://youtu.be/xxx\nAtau: .ytmp3 https://www.youtube.com/watch?v=xxx');
+                                                break;
+                                        }
+
+                                        const ytUrl = query.trim();
+                                        if (!ytUrl.includes('youtube.com') && !ytUrl.includes('youtu.be')) {
+                                                await m.reply('❌ Link tidak valid! Gunakan link YouTube.');
+                                                break;
+                                        }
+
+                                        const loadingMsg = await m.reply('⏳ Sedang mengambil info dari YouTube...');
+
+                                        const ytdlpBin = path.join(process.cwd(), 'tmp', 'yt-dlp');
+
+                                        const metaRaw = await new Promise((resolve, reject) => {
+                                                exec(`"${ytdlpBin}" --no-playlist --dump-json "${ytUrl}"`, { timeout: 30000 }, (err, stdout, stderr) => {
+                                                        if (err) return reject(new Error(stderr || err.message));
+                                                        resolve(stdout.trim());
+                                                });
+                                        });
+
+                                        const meta = JSON.parse(metaRaw);
+                                        const duration = meta.duration || 0;
+
+                                        if (duration > 600) {
+                                                await m.reply({ edit: loadingMsg.key, text: `❌ Durasi terlalu panjang! (${Math.floor(duration / 60)} menit)\nMaksimal 10 menit.` });
+                                                break;
+                                        }
+
+                                        await m.reply({ edit: loadingMsg.key, text: `⬇️ Mengunduh audio: *${meta.title}*...` });
+
+                                        const tmpId = Date.now();
+                                        const tmpFile = path.join(process.cwd(), 'tmp', `ytmp3_${tmpId}.mp3`);
+                                        const tmpTemplate = path.join(process.cwd(), 'tmp', `ytmp3_${tmpId}.%(ext)s`);
+
+                                        await new Promise((resolve, reject) => {
+                                                const cmd = `"${ytdlpBin}" --no-playlist -x --audio-format mp3 --audio-quality 5 -o "${tmpTemplate}" "${ytUrl}"`;
+                                                exec(cmd, { timeout: 120000 }, (err, stdout, stderr) => {
+                                                        if (err) return reject(new Error(stderr || err.message));
+                                                        resolve();
+                                                });
+                                        });
+
+                                        const audioBuffer = fs.readFileSync(tmpFile);
+
+                                        const durMin = Math.floor(duration / 60);
+                                        const durSec = Math.floor(duration % 60);
+                                        const durStr = `${durMin}:${String(durSec).padStart(2, '0')}`;
+
+                                        let mp3Info = `╭═══ *🎵 YTMP3 DOWNLOADER* ═══╮\n`;
+                                        mp3Info += `│ 📌 ${meta.title}\n`;
+                                        mp3Info += `│ ⏱️ ${durStr}\n`;
+                                        if (meta.uploader) mp3Info += `│ 👤 ${meta.uploader}\n`;
+                                        if (meta.view_count) mp3Info += `│ 👁️ ${parseInt(meta.view_count).toLocaleString('id-ID')} views\n`;
+                                        mp3Info += `╰════════════════════════╯`;
+
+                                        await hisoka.sendMessage(m.from, {
+                                                audio: audioBuffer,
+                                                mimetype: 'audio/mpeg',
+                                                fileName: `${meta.title.replace(/[^\w\s]/gi, '')}.mp3`,
+                                                ptt: false
+                                        }, { quoted: m });
+
+                                        await m.reply({ edit: loadingMsg.key, text: mp3Info });
+
+                                        try { fs.unlinkSync(tmpFile); } catch (_) {}
+
+                                        logCommand(m, hisoka, 'ytmp3');
+                                } catch (error) {
+                                        console.error('\x1b[31m[YTMP3] Error:\x1b[39m', error.message);
+                                        await m.reply(`❌ Gagal mengunduh audio: ${error.message?.substring(0, 200)}`);
+                                }
+                                break;
+                        }
+
+                        case 'ytmp4': {
+                                try {
+                                        if (!query) {
+                                                await m.reply('❌ Masukkan link YouTube!\n\nContoh: .ytmp4 https://youtu.be/xxx\nAtau: .ytmp4 https://www.youtube.com/watch?v=xxx');
+                                                break;
+                                        }
+
+                                        const ytUrl = query.trim();
+                                        if (!ytUrl.includes('youtube.com') && !ytUrl.includes('youtu.be')) {
+                                                await m.reply('❌ Link tidak valid! Gunakan link YouTube.');
+                                                break;
+                                        }
+
+                                        const loadingMsg = await m.reply('⏳ Sedang mengambil info dari YouTube...');
+
+                                        const ytdlpBin = path.join(process.cwd(), 'tmp', 'yt-dlp');
+
+                                        const metaRaw = await new Promise((resolve, reject) => {
+                                                exec(`"${ytdlpBin}" --no-playlist --dump-json "${ytUrl}"`, { timeout: 30000 }, (err, stdout, stderr) => {
+                                                        if (err) return reject(new Error(stderr || err.message));
+                                                        resolve(stdout.trim());
+                                                });
+                                        });
+
+                                        const meta = JSON.parse(metaRaw);
+                                        const duration = meta.duration || 0;
+
+                                        if (duration > 300) {
+                                                await m.reply({ edit: loadingMsg.key, text: `❌ Durasi terlalu panjang! (${Math.floor(duration / 60)} menit)\nMaksimal 5 menit untuk video.` });
+                                                break;
+                                        }
+
+                                        await m.reply({ edit: loadingMsg.key, text: `⬇️ Mengunduh video: *${meta.title}*...` });
+
+                                        const tmpId = Date.now();
+                                        const tmpFile = path.join(process.cwd(), 'tmp', `ytmp4_${tmpId}.mp4`);
+                                        const tmpTemplate = path.join(process.cwd(), 'tmp', `ytmp4_${tmpId}.%(ext)s`);
+
+                                        await new Promise((resolve, reject) => {
+                                                const cmd = `"${ytdlpBin}" --no-playlist -f "bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=360]+bestaudio/best[height<=360]" --merge-output-format mp4 -o "${tmpTemplate}" "${ytUrl}"`;
+                                                exec(cmd, { timeout: 180000 }, (err, stdout, stderr) => {
+                                                        if (err) return reject(new Error(stderr || err.message));
+                                                        resolve();
+                                                });
+                                        });
+
+                                        const videoBuffer = fs.readFileSync(tmpFile);
+
+                                        const durMin = Math.floor(duration / 60);
+                                        const durSec = Math.floor(duration % 60);
+                                        const durStr = `${durMin}:${String(durSec).padStart(2, '0')}`;
+
+                                        let mp4Info = `╭═══ *🎬 YTMP4 DOWNLOADER* ═══╮\n`;
+                                        mp4Info += `│ 📌 ${meta.title}\n`;
+                                        mp4Info += `│ ⏱️ ${durStr}\n`;
+                                        mp4Info += `│ 📐 360p max\n`;
+                                        if (meta.uploader) mp4Info += `│ 👤 ${meta.uploader}\n`;
+                                        if (meta.view_count) mp4Info += `│ 👁️ ${parseInt(meta.view_count).toLocaleString('id-ID')} views\n`;
+                                        mp4Info += `╰════════════════════════╯`;
+
+                                        await hisoka.sendMessage(m.from, {
+                                                video: videoBuffer,
+                                                caption: mp4Info,
+                                                mimetype: 'video/mp4'
+                                        }, { quoted: m });
+
+                                        await m.reply({ edit: loadingMsg.key, text: '✅ Video berhasil dikirim!' });
+
+                                        try { fs.unlinkSync(tmpFile); } catch (_) {}
+
+                                        logCommand(m, hisoka, 'ytmp4');
+                                } catch (error) {
+                                        console.error('\x1b[31m[YTMP4] Error:\x1b[39m', error.message);
+                                        await m.reply(`❌ Gagal mengunduh video: ${error.message?.substring(0, 200)}`);
+                                }
+                                break;
+                        }
 
                         default:
                                 break;
