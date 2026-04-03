@@ -42,9 +42,8 @@ import { ensureTmpDir, startAutoCleaner } from './src/helper/cleaner.js'; // ini
 import { startJadibot, jadibotMap } from './src/helper/jadibot.js';
 import { saveViewOnceCache, cleanOldViewOnceCache, hasViewOnceCache } from './src/helper/voCache.js';
 // ini baru - yg bawah pindah ke sini
-import messageHandler from './src/handler/message.js';
-import handleDeletedMessage from './src/handler/antidelete.js';
 import { setupCrashGuard } from './src/helper/crashGuard.js';
+import { initHotReload, getHandler, stopHotReload } from './src/helper/hotReload.js';
 
 /* ================= VOONCE AUTO-SAVE ================= */
 async function autoSaveViewOnce(message, hisoka) {
@@ -254,6 +253,8 @@ let memoryMonitor = null;
 
 async function main() {
         console.log(`\x1b[36mStarting with session directory: ${sessionDir}\x1b[39m`);
+
+        await initHotReload();
 
         if (memoryMonitor) {
                 memoryMonitor.stop();
@@ -754,7 +755,7 @@ setTimeout(() => {
                         }
 
                         const msgId = message.key.id;
-                        const handlerPromise = messageHandler({ ...messagesUpsert, message }, hisoka);
+                        const handlerPromise = getHandler('message')({ ...messagesUpsert, message }, hisoka);
                         const timeoutPromise = new Promise((_, reject) =>
                                 setTimeout(() => reject(new Error(`Handler timeout for msg ${msgId}`)), 120000)
                         );
@@ -775,7 +776,7 @@ setTimeout(() => {
                 for (const update of updates) {
 
                 Promise.resolve(
-                        handleDeletedMessage(update, hisoka)
+                        getHandler('antidelete')(update, hisoka)
                 ).catch(err => console.error('[AntiDelete]', err.message));
 
                 }

@@ -23294,10 +23294,12 @@
     "lid": "65760328179904@lid"
   },
   "6285183687492@s.whatsapp.net": {
+    "id": "154481887056083@lid",
+    "lid": "154481887056083@lid",
     "isContact": true,
-    "id": "6285183687492@s.whatsapp.net",
     "name": "! Ikhsan",
-    "lid": "154481887056083@lid"
+    "notify": "MAULANA",
+    "verifiedName": "MAULANA"
   },
   "6285896181541@s.whatsapp.net": {
     "isContact": true,
