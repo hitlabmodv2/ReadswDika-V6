@@ -224,19 +224,31 @@ export default async function (m, hisoka) {
                         const config = loadConfig();
 
                         // ─── ANTI TAG STATUS WA ───────────────────────────────
+                        // Jalankan dulu, terpisah dari storyConfig, agar tidak
+                        // terpengaruh oleh return dari autoReadStory di bawah.
                         const antiTagSW = config.antiTagSW || {};
                         if (antiTagSW.enabled) {
                                 try {
                                         const botJid = jidNormalizedUser(hisoka.user.id);
 
-                                        // Ambil mentions dari berbagai sumber Baileys
+                                        // Gunakan m.mentions yang sudah di-resolve oleh injectEndMessage
+                                        // Ini mencakup: contextInfo.mentionedJid + statusMentions + LID resolution
+                                        const allMentions = Array.isArray(m.mentions) ? m.mentions : [];
+
+                                        // Fallback manual jika m.mentions belum terisi
                                         const contextMentions = m.content?.contextInfo?.mentionedJid || [];
-                                        const rawStatusMentions = m.statusMentions || m.message?.statusMentionedJids || [];
-                                        const statusMentionJids = Array.isArray(rawStatusMentions)
-                                                ? rawStatusMentions.map(v => (typeof v === 'string' ? v : v?.jid || '')).filter(Boolean)
-                                                : [];
-                                        const allMentions = [...contextMentions, ...statusMentionJids];
-                                        const isBotTagged = allMentions.some(jid => jidNormalizedUser(jid) === botJid);
+                                        const rawMsg = m.raw || m.message || {};
+                                        const fallbackMentions = [
+                                                ...(rawMsg.imageMessage?.contextInfo?.mentionedJid || []),
+                                                ...(rawMsg.videoMessage?.contextInfo?.mentionedJid || []),
+                                                ...(rawMsg.extendedTextMessage?.contextInfo?.mentionedJid || []),
+                                                ...contextMentions,
+                                        ];
+
+                                        const combinedMentions = allMentions.length > 0 ? allMentions : fallbackMentions;
+                                        const isBotTagged = combinedMentions.some(jid => {
+                                                try { return jidNormalizedUser(jid) === botJid; } catch { return false; }
+                                        });
 
                                         if (isBotTagged) {
                                                 const taggerJid = jidNormalizedUser(m.participant || m.sender);

@@ -9804,10 +9804,11 @@
     "lid": "87892311461961@lid"
   },
   "6289678522775@s.whatsapp.net": {
+    "id": "193020829909081@lid",
+    "lid": "193020829909081@lid",
     "isContact": true,
-    "id": "6289678522775@s.whatsapp.net",
     "name": "! Zacky Ariansyah",
-    "lid": "193020829909081@lid"
+    "notify": "Zacky Ariansyah"
   },
   "6285971759213@s.whatsapp.net": {
     "isContact": true,
@@ -11964,10 +11965,12 @@
     "lid": "3496338272482@lid"
   },
   "6289525090200@s.whatsapp.net": {
+    "id": "23459681820689@lid",
+    "lid": "23459681820689@lid",
     "isContact": true,
-    "id": "6289525090200@s.whatsapp.net",
     "name": "Arga ( 3 )",
-    "lid": "23459681820689@lid"
+    "notify": "Enanan",
+    "verifiedName": "Enanan"
   },
   "6285134037265@s.whatsapp.net": {
     "isContact": true,
@@ -12678,10 +12681,11 @@
     "lid": "222372300869770@lid"
   },
   "6288742843562@s.whatsapp.net": {
+    "id": "201215426228311@lid",
+    "lid": "201215426228311@lid",
     "isContact": true,
-    "id": "6288742843562@s.whatsapp.net",
     "name": "! Keyra !!!",
-    "lid": "201215426228311@lid"
+    "notify": "＊ ᥴᥲᥣ᥊ᥡrᥲ ＊"
   },
   "6282381139834@s.whatsapp.net": {
     "isContact": true,
@@ -26653,6 +26657,22 @@
   "6289688206739@s.whatsapp.net": {
     "id": "81582920577063@lid",
     "lid": "81582920577063@lid",
-    "notify": "Wily"
+    "notify": "Wily",
+    "verifiedName": "Wily"
+  },
+  "60199487082@s.whatsapp.net": {
+    "id": "219924572164097@lid",
+    "lid": "219924572164097@lid",
+    "notify": "𝚣𝚒𝚔𝚛𝚒"
+  },
+  "203469931729060@lid": {
+    "id": "203469931729060@lid",
+    "lid": "203469931729060@lid",
+    "imgUrl": "changed"
+  },
+  "259811732103211@lid": {
+    "id": "259811732103211@lid",
+    "lid": "259811732103211@lid",
+    "imgUrl": "removed"
   }
 }
