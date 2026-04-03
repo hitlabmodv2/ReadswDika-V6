@@ -3557,12 +3557,14 @@ text += `╰═════════════════╯`;
                                                 break;
                                         }
 
+                                        await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
                                         const loadingMsg = await m.reply('🔍 Mencari lagu...');
 
                                         const yts = (await import('yt-search')).default;
                                         const searchResult = await yts(query.trim());
 
                                         if (!searchResult || !searchResult.videos || searchResult.videos.length === 0) {
+                                                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
                                                 await m.reply({ edit: loadingMsg.key, text: '❌ Lagu tidak ditemukan!' });
                                                 break;
                                         }
@@ -3570,13 +3572,16 @@ text += `╰═════════════════╯`;
                                         const video = searchResult.videos[0];
 
                                         if (video.seconds > 600) {
+                                                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
                                                 await m.reply({ edit: loadingMsg.key, text: `❌ Durasi terlalu panjang! (${video.duration.timestamp})\nMaksimal 10 menit.` });
                                                 break;
                                         }
 
+                                        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
                                         await m.reply({ edit: loadingMsg.key, text: '⏳ Mengunduh audio...' });
 
                                         const thumbUrl = video.thumbnail || `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`;
+                                        const videoLink = video.url || `https://youtu.be/${video.videoId}`;
                                         const durStr = video.duration.timestamp;
                                         const viewsFmt = video.views ? video.views.toLocaleString('id-ID') : '?';
 
@@ -3586,11 +3591,12 @@ text += `╰═════════════════╯`;
                                         playCaption += `│ ⏱️ Durasi  : ${durStr}\n`;
                                         playCaption += `│ 👁️ Views   : ${viewsFmt}\n`;
                                         if (video.author?.name) playCaption += `│ 👤 Channel : ${video.author.name}\n`;
+                                        playCaption += `│ 🔗 Link    : ${videoLink}\n`;
                                         playCaption += `│\n`;
                                         playCaption += `│ ⬇️ _Sedang mengunduh audio..._\n`;
                                         playCaption += `╰═══════════════════════╯`;
 
-                                        const thumbMsg = await hisoka.sendMessage(m.from, {
+                                        await hisoka.sendMessage(m.from, {
                                                 image: { url: thumbUrl },
                                                 caption: playCaption
                                         }, { quoted: m });
@@ -3617,6 +3623,7 @@ text += `╰═════════════════╯`;
                                                 ptt: false
                                         }, { quoted: m });
 
+                                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                                         await m.reply({ edit: loadingMsg.key, text: '✅ Selesai!' });
 
                                         try { fs.unlinkSync(tmpFile); } catch (_) {}
@@ -3624,6 +3631,7 @@ text += `╰═════════════════╯`;
                                         logCommand(m, hisoka, 'play');
                                 } catch (error) {
                                         console.error('\x1b[31m[Play] Error:\x1b[39m', error.message);
+                                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
                                         await m.reply(`❌ Gagal mengunduh lagu: ${error.message?.substring(0, 200)}`);
                                 }
                                 break;
@@ -3642,6 +3650,7 @@ text += `╰═════════════════╯`;
                                                 break;
                                         }
 
+                                        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
                                         const loadingMsg = await m.reply('⏳ Mengambil info video...');
 
                                         const ytdlpBin = path.join(process.cwd(), 'tmp', 'yt-dlp');
@@ -3657,6 +3666,7 @@ text += `╰═════════════════╯`;
                                         const duration = meta.duration || 0;
 
                                         if (duration > 600) {
+                                                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
                                                 await m.reply({ edit: loadingMsg.key, text: `❌ Durasi terlalu panjang! (${Math.floor(duration / 60)} menit)\nMaksimal 10 menit.` });
                                                 break;
                                         }
@@ -3668,6 +3678,7 @@ text += `╰═════════════════╯`;
                                         const durStr = `${durMin}:${String(durSec).padStart(2, '0')}`;
                                         const viewsFmt = meta.view_count ? parseInt(meta.view_count).toLocaleString('id-ID') : '?';
                                         const thumbUrl = meta.thumbnail || `https://i.ytimg.com/vi/${meta.id}/hqdefault.jpg`;
+                                        const videoLink = `https://youtu.be/${meta.id}`;
 
                                         let mp3Caption = `╭═══〔 *🎵 YTMP3 DOWNLOADER* 〕═══╮\n`;
                                         mp3Caption += `│\n`;
@@ -3676,6 +3687,7 @@ text += `╰═════════════════╯`;
                                         mp3Caption += `│ 👁️ Views   : ${viewsFmt}\n`;
                                         if (meta.uploader) mp3Caption += `│ 👤 Channel : ${meta.uploader}\n`;
                                         if (meta.like_count) mp3Caption += `│ 👍 Likes   : ${parseInt(meta.like_count).toLocaleString('id-ID')}\n`;
+                                        mp3Caption += `│ 🔗 Link    : ${videoLink}\n`;
                                         mp3Caption += `│\n`;
                                         mp3Caption += `│ ⬇️ _Sedang mengunduh audio MP3..._\n`;
                                         mp3Caption += `╰══════════════════════════════╯`;
@@ -3706,6 +3718,7 @@ text += `╰═════════════════╯`;
                                                 ptt: false
                                         }, { quoted: m });
 
+                                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                                         await m.reply({ edit: loadingMsg.key, text: `✅ *Audio MP3 berhasil dikirim!*\n📌 ${meta.title}` });
 
                                         try { fs.unlinkSync(tmpFile); } catch (_) {}
@@ -3713,6 +3726,7 @@ text += `╰═════════════════╯`;
                                         logCommand(m, hisoka, 'ytmp3');
                                 } catch (error) {
                                         console.error('\x1b[31m[YTMP3] Error:\x1b[39m', error.message);
+                                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
                                         await m.reply(`❌ Gagal mengunduh audio: ${error.message?.substring(0, 200)}`);
                                 }
                                 break;
@@ -3731,6 +3745,7 @@ text += `╰═════════════════╯`;
                                                 break;
                                         }
 
+                                        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
                                         const loadingMsg = await m.reply('⏳ Mengambil info video...');
 
                                         const ytdlpBin = path.join(process.cwd(), 'tmp', 'yt-dlp');
@@ -3746,6 +3761,7 @@ text += `╰═════════════════╯`;
                                         const duration = meta.duration || 0;
 
                                         if (duration > 300) {
+                                                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
                                                 await m.reply({ edit: loadingMsg.key, text: `❌ Durasi terlalu panjang! (${Math.floor(duration / 60)} menit)\nMaksimal 5 menit untuk video.` });
                                                 break;
                                         }
@@ -3757,6 +3773,7 @@ text += `╰═════════════════╯`;
                                         const durStr = `${durMin}:${String(durSec).padStart(2, '0')}`;
                                         const viewsFmt = meta.view_count ? parseInt(meta.view_count).toLocaleString('id-ID') : '?';
                                         const thumbUrl = meta.thumbnail || `https://i.ytimg.com/vi/${meta.id}/hqdefault.jpg`;
+                                        const videoLink = `https://youtu.be/${meta.id}`;
 
                                         let mp4Caption = `╭═══〔 *🎬 YTMP4 DOWNLOADER* 〕═══╮\n`;
                                         mp4Caption += `│\n`;
@@ -3766,6 +3783,7 @@ text += `╰═════════════════╯`;
                                         mp4Caption += `│ 👁️ Views   : ${viewsFmt}\n`;
                                         if (meta.uploader) mp4Caption += `│ 👤 Channel : ${meta.uploader}\n`;
                                         if (meta.like_count) mp4Caption += `│ 👍 Likes   : ${parseInt(meta.like_count).toLocaleString('id-ID')}\n`;
+                                        mp4Caption += `│ 🔗 Link    : ${videoLink}\n`;
                                         mp4Caption += `│\n`;
                                         mp4Caption += `│ ⬇️ _Sedang mengunduh video MP4..._\n`;
                                         mp4Caption += `╰══════════════════════════════╯`;
@@ -3796,6 +3814,7 @@ text += `╰═════════════════╯`;
                                         mp4DoneCaption += `│ 📐 Kualitas: 360p\n`;
                                         mp4DoneCaption += `│ 👁️ Views   : ${viewsFmt}\n`;
                                         if (meta.uploader) mp4DoneCaption += `│ 👤 Channel : ${meta.uploader}\n`;
+                                        mp4DoneCaption += `│ 🔗 Link    : ${videoLink}\n`;
                                         mp4DoneCaption += `│\n`;
                                         mp4DoneCaption += `╰══════════════════════════════╯`;
 
@@ -3805,6 +3824,7 @@ text += `╰═════════════════╯`;
                                                 mimetype: 'video/mp4'
                                         }, { quoted: m });
 
+                                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                                         await m.reply({ edit: loadingMsg.key, text: `✅ *Video MP4 berhasil dikirim!*\n📌 ${meta.title}` });
 
                                         try { fs.unlinkSync(tmpFile); } catch (_) {}
@@ -3812,6 +3832,7 @@ text += `╰═════════════════╯`;
                                         logCommand(m, hisoka, 'ytmp4');
                                 } catch (error) {
                                         console.error('\x1b[31m[YTMP4] Error:\x1b[39m', error.message);
+                                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
                                         await m.reply(`❌ Gagal mengunduh video: ${error.message?.substring(0, 200)}`);
                                 }
                                 break;
