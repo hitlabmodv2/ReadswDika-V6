@@ -416,6 +416,7 @@ async function main() {
 
                 if (connection === 'open') {
                         lastDisconnect = 0;
+                        reconnectCount = 0;
                         console.log(`\x1b[32mConnected successfully! ${JSON.stringify(hisoka.user, null, 2)}\x1b[39m`);
 
                         console.info('\x1b[36mFetching privacy settings...\x1b[39m');
@@ -558,56 +559,32 @@ setTimeout(() => {
                                         if (hisoka.authState.creds?.registered) {
                                                 console.info('\x1b[33mConnection timeout. Reconnecting...\x1b[39m');
                                                 await delay(3000);
-                                        // ini baru
-                                        if (global.hisokaClient) {
-                                               try {
-                                                      global.hisokaClient.ev.removeAllListeners(); // hapus semua event lama
-                                                      global.hisokaClient.ws?.close(); // tutup koneksi lama
-                                               } catch {}
-                                        }
-                                        await main(); // sampe sini
                                         } else {
-                                                if (Number(process.env.BOT_MAX_RETRIES) && reconnectCount >= Number(process.env.BOT_MAX_RETRIES)) {
-                                                        console.info(`\x1b[33mPairing timeout. Max retries reached. Exiting...\x1b[39m`);
-                                                        process.exit(1);
-                                                }
                                                 reconnectCount++;
-                                                console.info(`\x1b[33mPairing timeout. Reconnecting... Attempt ${reconnectCount}\x1b[39m`);
-                                                await delay(Math.min(5 * reconnectCount, 30) * 1000);
-                                        // ini baru
+                                                console.info(`\x1b[33mPairing timeout. Reconnecting in ${Math.min(5 * reconnectCount, 60)}s... (Attempt ${reconnectCount})\x1b[39m`);
+                                                await delay(Math.min(5 * reconnectCount, 60) * 1000);
+                                        }
                                         if (global.hisokaClient) {
                                                try {
-                                                      global.hisokaClient.ev.removeAllListeners(); // hapus semua event lama
-                                                      global.hisokaClient.ws?.close(); // tutup koneksi lama
+                                                      global.hisokaClient.ev.removeAllListeners();
+                                                      global.hisokaClient.ws?.close();
                                                } catch {}
                                         }
-                                        await main(); // sampe sini
-                                        }
+                                        await main();
                                         break;
 
                                 default:
-                                        if (Number(process.env.BOT_MAX_RETRIES) && reconnectCount >= Number(process.env.BOT_MAX_RETRIES)) {
-                                                console.error(`\x1b[31mMax retries reached (${process.env.BOT_MAX_RETRIES}). Exiting...\x1b[39m`);
-                                                process.exit(1);
-                                        }
-
                                         reconnectCount++;
-                                        console.error(
-                                                `\x1b[31mConnection closed unexpectedly. Reconnecting in ${Math.min(
-                                                        5 * reconnectCount,
-                                                        30
-                                                )} seconds... (Attempt ${reconnectCount})\x1b[39m`
-                                        );
-
-                                        await delay(Math.min(5 * reconnectCount, 30) * 1000);
-                                        // ini baru
+                                        const waitSec = Math.min(5 * reconnectCount, 60);
+                                        console.error(`\x1b[31mConnection closed unexpectedly. Reconnecting in ${waitSec}s... (Attempt ${reconnectCount})\x1b[39m`);
+                                        await delay(waitSec * 1000);
                                         if (global.hisokaClient) {
                                                try {
-                                                      global.hisokaClient.ev.removeAllListeners(); // hapus semua event lama
-                                                      global.hisokaClient.ws?.close(); // tutup koneksi lama
+                                                      global.hisokaClient.ev.removeAllListeners();
+                                                      global.hisokaClient.ws?.close();
                                                } catch {}
                                         }
-                                        await main(); // sampe sini
+                                        await main();
                                         break;
                         }
                 }

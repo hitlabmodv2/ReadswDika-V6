@@ -72,10 +72,11 @@
     "lid": "206497749454857@lid"
   },
   "6285791556825@s.whatsapp.net": {
+    "id": "87552958685217@lid",
+    "lid": "87552958685217@lid",
     "isContact": true,
-    "id": "6285791556825@s.whatsapp.net",
     "name": "NightMare | BadDreamer",
-    "lid": "87552958685217@lid"
+    "notify": "nmka.nam"
   },
   "6285159520096@s.whatsapp.net": {
     "isContact": true,
@@ -2562,10 +2563,11 @@
     "lid": "186998698594420@lid"
   },
   "6281222884622@s.whatsapp.net": {
+    "id": "23274595578098@lid",
+    "lid": "23274595578098@lid",
     "isContact": true,
-    "id": "6281222884622@s.whatsapp.net",
     "name": "Alfian",
-    "lid": "23274595578098@lid"
+    "notify": "~ Alfian"
   },
   "60142315932@s.whatsapp.net": {
     "isContact": true,
@@ -7008,10 +7010,11 @@
     "lid": "196671434707066@lid"
   },
   "6282277708591@s.whatsapp.net": {
+    "id": "219705377824864@lid",
+    "lid": "219705377824864@lid",
     "isContact": true,
-    "id": "6282277708591@s.whatsapp.net",
     "name": "! Munawir A",
-    "lid": "219705377824864@lid"
+    "notify": "munawirahmadr"
   },
   "6285705198536@s.whatsapp.net": {
     "isContact": true,
@@ -8280,10 +8283,12 @@
     "lid": "35983638691945@lid"
   },
   "6287812372599@s.whatsapp.net": {
+    "id": "101949638746286@lid",
+    "lid": "101949638746286@lid",
     "isContact": true,
-    "id": "6287812372599@s.whatsapp.net",
     "name": "▫️BnZ_Eagle",
-    "lid": "101949638746286@lid"
+    "notify": "BnZ_Enquarorth",
+    "verifiedName": "BnZ_Enquarorth"
   },
   "6289505583072@s.whatsapp.net": {
     "isContact": true,
@@ -8900,10 +8905,11 @@
     "lid": "34862350217452@lid"
   },
   "6289527882009@s.whatsapp.net": {
+    "id": "278709537919071@lid",
+    "lid": "278709537919071@lid",
     "isContact": true,
-    "id": "6289527882009@s.whatsapp.net",
     "name": "▫️Abdul",
-    "lid": "278709537919071@lid"
+    "notify": "ab"
   },
   "6285781143805@s.whatsapp.net": {
     "isContact": true,
@@ -16273,10 +16279,11 @@
     "lid": "40952731295866@lid"
   },
   "6289608959040@s.whatsapp.net": {
+    "id": "176257136341194@lid",
+    "lid": "176257136341194@lid",
     "isContact": true,
-    "id": "6289608959040@s.whatsapp.net",
     "name": "! mil",
-    "lid": "176257136341194@lid"
+    "notify": "laa💤"
   },
   "6283893797153@s.whatsapp.net": {
     "isContact": true,
@@ -16333,10 +16340,11 @@
     "lid": "63900758335560@lid"
   },
   "6283182665936@s.whatsapp.net": {
+    "id": "165536713416760@lid",
+    "lid": "165536713416760@lid",
     "isContact": true,
-    "id": "6283182665936@s.whatsapp.net",
     "name": "ルトピ",
-    "lid": "165536713416760@lid"
+    "notify": "Luthfi"
   },
   "6288220126701@s.whatsapp.net": {
     "isContact": true,
@@ -18057,10 +18065,11 @@
     "lid": "105506374971631@lid"
   },
   "6285246277215@s.whatsapp.net": {
+    "id": "272245645643794@lid",
+    "lid": "272245645643794@lid",
     "isContact": true,
-    "id": "6285246277215@s.whatsapp.net",
     "name": "! Antri",
-    "lid": "272245645643794@lid"
+    "notify": "𝓳𝓮𝓸𝓷𝓰𝓱𝓪𝓷"
   },
   "628895533677@s.whatsapp.net": {
     "isContact": true,
@@ -22185,10 +22194,11 @@
     "lid": "172614987305179@lid"
   },
   "6282178071400@s.whatsapp.net": {
+    "id": "207348589179086@lid",
+    "lid": "207348589179086@lid",
     "isContact": true,
-    "id": "6282178071400@s.whatsapp.net",
     "name": "! zyennn",
-    "lid": "207348589179086@lid"
+    "notify": "⏤Shënzï Lövêri"
   },
   "6287831677154@s.whatsapp.net": {
     "isContact": true,
@@ -24461,10 +24471,11 @@
     "lid": "60885557067998@lid"
   },
   "6281973145146@s.whatsapp.net": {
+    "id": "245023656403118@lid",
+    "lid": "245023656403118@lid",
     "isContact": true,
-    "id": "6281973145146@s.whatsapp.net",
     "name": "√Salsaツ",
-    "lid": "245023656403118@lid"
+    "notify": "𝘿𝙚𝙡𝙩𝙖 𝑰𝑨𝑮"
   },
   "6285820634855@s.whatsapp.net": {
     "isContact": true,
@@ -26764,5 +26775,99 @@
     "id": "130438324613201@lid",
     "lid": "130438324613201@lid",
     "imgUrl": "removed"
+  },
+  "214736134209553@lid": {
+    "id": "214736134209553@lid",
+    "lid": "214736134209553@lid",
+    "imgUrl": "changed"
+  },
+  "6283137961488@s.whatsapp.net": {
+    "id": "6283137961488@s.whatsapp.net",
+    "notify": "M.FTH.IZ"
+  },
+  "6281288237083@s.whatsapp.net": {
+    "id": "191981112307958@lid",
+    "lid": "191981112307958@lid",
+    "notify": "Ryo V 1"
+  },
+  "6285876248925@s.whatsapp.net": {
+    "id": "188716853289015@lid",
+    "lid": "188716853289015@lid",
+    "notify": "Ryu am prem ready."
+  },
+  "106536814805225@lid": {
+    "id": "106536814805225@lid",
+    "lid": "106536814805225@lid",
+    "imgUrl": "removed"
+  },
+  "133874231279813@lid": {
+    "id": "133874231279813@lid",
+    "lid": "133874231279813@lid",
+    "imgUrl": "changed"
+  },
+  "142730571325638@lid": {
+    "id": "142730571325638@lid",
+    "lid": "142730571325638@lid",
+    "imgUrl": "changed"
+  },
+  "159480809562225@lid": {
+    "id": "159480809562225@lid",
+    "lid": "159480809562225@lid",
+    "imgUrl": "changed"
+  },
+  "166993227444323@lid": {
+    "id": "166993227444323@lid",
+    "lid": "166993227444323@lid",
+    "imgUrl": "removed"
+  },
+  "176823904239746@lid": {
+    "id": "176823904239746@lid",
+    "lid": "176823904239746@lid",
+    "imgUrl": "changed"
+  },
+  "177683417813151@lid": {
+    "id": "177683417813151@lid",
+    "lid": "177683417813151@lid",
+    "imgUrl": "removed"
+  },
+  "192453239926897@lid": {
+    "id": "192453239926897@lid",
+    "lid": "192453239926897@lid",
+    "imgUrl": "removed"
+  },
+  "194232061063346@lid": {
+    "id": "194232061063346@lid",
+    "lid": "194232061063346@lid",
+    "imgUrl": "removed"
+  },
+  "229991455416490@lid": {
+    "id": "229991455416490@lid",
+    "lid": "229991455416490@lid",
+    "imgUrl": "removed"
+  },
+  "265948669960432@lid": {
+    "id": "265948669960432@lid",
+    "lid": "265948669960432@lid",
+    "imgUrl": "removed"
+  },
+  "760209240304@lid": {
+    "id": "760209240304@lid",
+    "lid": "760209240304@lid",
+    "imgUrl": "changed"
+  },
+  "84735862829111@lid": {
+    "id": "84735862829111@lid",
+    "lid": "84735862829111@lid",
+    "imgUrl": "removed"
+  },
+  "62882020696316@s.whatsapp.net": {
+    "id": "9204131708977@lid",
+    "lid": "9204131708977@lid",
+    "notify": "lido"
+  },
+  "628997837500@s.whatsapp.net": {
+    "id": "242150558159039@lid",
+    "lid": "242150558159039@lid",
+    "notify": "Ken"
   }
 }
