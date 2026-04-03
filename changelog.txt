@@ -33,6 +33,27 @@
 └ Fix: Tambah flag isMainActive agar tidak ada 2 instance
   bot berjalan bersamaan saat restart dipicu
 
+> 📌 *Command .play — Kembali Aktif & Diperbaiki*
+└ Sebelumnya: dihapus karena dependensi berat
+└ Fix: Dibangun ulang pakai yt-search + yt-dlp binary
+└ Cari lagu by judul, kirim sebagai audio MP3
+└ Validasi durasi maks 10 menit sebelum download
+└ Reaction 🔍 cari → ⏳ download → ✅ selesai
+
+> 📌 *Command .ytmp3 — Kembali Aktif & Diperbaiki*
+└ Sebelumnya: dihapus karena dependensi berat
+└ Fix: Dibangun ulang pakai yt-dlp binary di tmp/
+└ Input link YouTube → kirim sebagai audio MP3
+└ Tampil info judul, durasi, ukuran file sebelum kirim
+└ Error handling: pesan gagal yang jelas & informatif
+
+> 📌 *Command .ytmp4 — Kembali Aktif & Diperbaiki*
+└ Sebelumnya: dihapus karena dependensi berat
+└ Fix: Dibangun ulang pakai yt-dlp binary di tmp/
+└ Input link YouTube → kirim sebagai video MP4
+└ Tampil info judul, resolusi, durasi, ukuran file
+└ Error handling: pesan gagal yang jelas & informatif
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -65,7 +86,9 @@
 └ setupCrashGuard() sekarang menerima fungsi restart
 └ Static import message.js & antidelete.js diganti
   dynamic import via sistem Hot Reload
-└ Jumlah command: *72 command* (tidak berubah)
+└ .play / .ytmp3 / .ytmp4 dibangun ulang tanpa package
+  berat, kini pakai yt-dlp binary & yt-search
+└ Jumlah command: 72 → *75 command*
 
 ═══════════════════════════════════
 🤖 *Wily-Bot* — Updated 3 Apr 2026
