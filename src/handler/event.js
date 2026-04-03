@@ -222,6 +222,52 @@ export default async function (m, hisoka) {
                 // ini baru
                 if (!m.isOwner && m.key?.remoteJid === 'status@broadcast' && m.message && m.type && m.type !== 'protocolMessage' && m.type !== 'reactionMessage') { // sampe sini
                         const config = loadConfig();
+
+                        // ─── ANTI TAG STATUS WA ───────────────────────────────
+                        const antiTagSW = config.antiTagSW || {};
+                        if (antiTagSW.enabled) {
+                                try {
+                                        const botJid = jidNormalizedUser(hisoka.user.id);
+
+                                        // Ambil mentions dari berbagai sumber Baileys
+                                        const contextMentions = m.content?.contextInfo?.mentionedJid || [];
+                                        const rawStatusMentions = m.statusMentions || m.message?.statusMentionedJids || [];
+                                        const statusMentionJids = Array.isArray(rawStatusMentions)
+                                                ? rawStatusMentions.map(v => (typeof v === 'string' ? v : v?.jid || '')).filter(Boolean)
+                                                : [];
+                                        const allMentions = [...contextMentions, ...statusMentionJids];
+                                        const isBotTagged = allMentions.some(jid => jidNormalizedUser(jid) === botJid);
+
+                                        if (isBotTagged) {
+                                                const taggerJid = jidNormalizedUser(m.participant || m.sender);
+                                                const taggerNumber = jidDecode(taggerJid)?.user || 'Unknown';
+                                                const taggerName = m.pushName || hisoka.getName(taggerJid, true) || taggerNumber;
+
+                                                console.log(`\x1b[33m[AntiTagSW]\x1b[0m \x1b[1m${taggerName}\x1b[0m (${taggerNumber}) men-tag bot di status`);
+
+                                                // Auto-reply ke pengirim
+                                                if (antiTagSW.autoReply !== false) {
+                                                        const replyMsg = antiTagSW.message || 'Hei kak! Tolong jangan tag bot di status WhatsApp ya 🙏';
+                                                        await hisoka.sendMessage(taggerJid, { text: replyMsg }).catch(err => {
+                                                                console.error('\x1b[31m[AntiTagSW] Gagal reply:\x1b[39m', err.message);
+                                                        });
+                                                }
+
+                                                // Notifikasi ke owner
+                                                if (antiTagSW.notifyOwner !== false) {
+                                                        const owners = (config.owners || []).map(n => `${n}@s.whatsapp.net`);
+                                                        const notifText = `🔔 *[ANTI TAG STATUS]*\n\nSeseorang men-tag bot di status WA mereka!\n\n👤 *Nama:* ${taggerName}\n📞 *Nomor:* ${taggerNumber}\n🕐 *Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`;
+                                                        for (const ownerJid of owners) {
+                                                                await hisoka.sendMessage(ownerJid, { text: notifText }).catch(() => {});
+                                                        }
+                                                }
+                                        }
+                                } catch (tagErr) {
+                                        console.error('\x1b[31m[AntiTagSW] Error:\x1b[39m', tagErr.message);
+                                }
+                        }
+                        // ─────────────────────────────────────────────────────
+
                         const storyConfig = config.autoReadStory || {};
                         
                         if (storyConfig.enabled === false) return;

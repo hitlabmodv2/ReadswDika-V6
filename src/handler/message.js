@@ -524,6 +524,7 @@ ${readMore}
 │ ∘ .delemoji
 │ ∘ .listemoji
 │ ∘ .antidel
+│ ∘ .antitagsw
 │ ∘ .anticall
 │ ∘ .anticallvid
 │ ∘ .telegram
@@ -589,6 +590,7 @@ ${readMore}
                                         const autoOnline = config.autoOnline || {};
                                         const autoReadStory = config.autoReadStory || {};
                                         const antiDelete = config.antiDelete || {};
+                                        const antiTagSW = config.antiTagSW || {};
                                         const antiCall = config.antiCall || {};
                                         const antiCallVideo = config.antiCallVideo || {};
                                         const telegram = config.telegram || {};
@@ -649,6 +651,15 @@ ${readMore}
                                                         details: antiDelete.enabled ? [
                                                                 `├ Private: ${statusIcon(antiDelete.privateChat)}`,
                                                                 `└ Group: ${statusIcon(antiDelete.groupChat)}`
+                                                        ] : []
+                                                },
+                                                {
+                                                        name: 'Anti Tag SW',
+                                                        icon: '🏷️',
+                                                        enabled: antiTagSW.enabled,
+                                                        details: antiTagSW.enabled ? [
+                                                                `├ Auto Reply: ${statusIcon(antiTagSW.autoReply !== false)}`,
+                                                                `└ Notif Owner: ${statusIcon(antiTagSW.notifyOwner !== false)}`
                                                         ] : []
                                                 },
                                                 {
@@ -1604,6 +1615,92 @@ text += `╰═════════════════════╯`;
                                         logCommand(m, hisoka, 'antidel');
                                 } catch (error) {
                                         console.error('\x1b[31m[AntiDelete] Error:\x1b[39m', error.message);
+                                        await m.reply(`Mohon maaf, terjadi kesalahan: ${error.message}`);
+                                }
+                                break;
+                        }
+
+                        case 'antitagsw':
+                        case 'atsw': {
+                                if (!isMainBot(hisoka)) return;
+                                if (!m.isOwner) return;
+                                try {
+                                        const config = loadConfig();
+                                        const antiTagSW = config.antiTagSW || { enabled: false, autoReply: true, message: '', notifyOwner: true };
+                                        const args = query ? query.toLowerCase().trim().split(/\s+/) : [];
+
+                                        if (args.length === 0 || (args.length === 1 && args[0] === '')) {
+                                                let text = `╭═══『 *ANTI TAG STATUS WA* 』═══╮\n`;
+text += `│\n`;
+text += `│ *Status:* ${antiTagSW.enabled ? '✅ Aktif' : '❌ Nonaktif'}\n`;
+text += `│ *Auto Reply:* ${antiTagSW.autoReply !== false ? '✅' : '❌'}\n`;
+text += `│ *Notif Owner:* ${antiTagSW.notifyOwner !== false ? '✅' : '❌'}\n`;
+text += `│ *Pesan Reply:*\n`;
+text += `│ ${antiTagSW.message || '(belum diset)'}\n`;
+text += `│\n`;
+text += `│ *Info:*\n`;
+text += `│ Bot otomatis deteksi jika ada\n`;
+text += `│ yang tag bot di status WA mereka.\n`;
+text += `│\n`;
+text += `│ *Penggunaan:*\n`;
+text += `│ .antitagsw on/off\n`;
+text += `│ .antitagsw reply on/off\n`;
+text += `│ .antitagsw notify on/off\n`;
+text += `│ .antitagsw msg <pesan>\n`;
+text += `│\n`;
+text += `╰════════════════════════╯`;
+                                                await m.reply(text);
+                                                break;
+                                        }
+
+                                        if (args[0] === 'on') {
+                                                config.antiTagSW = { ...antiTagSW, enabled: true };
+                                                saveConfig(config);
+                                                await m.reply('✅ *Anti Tag Status WA diaktifkan!*\n\nBot akan memantau jika ada yang tag bot di status WA mereka.');
+
+                                        } else if (args[0] === 'off') {
+                                                config.antiTagSW = { ...antiTagSW, enabled: false };
+                                                saveConfig(config);
+                                                await m.reply('✅ *Anti Tag Status WA dinonaktifkan!*');
+
+                                        } else if (args[0] === 'reply') {
+                                                if (!args[1] || !['on', 'off'].includes(args[1])) {
+                                                        await m.reply('Format: .antitagsw reply on / .antitagsw reply off');
+                                                        break;
+                                                }
+                                                const enabled = args[1] === 'on';
+                                                config.antiTagSW = { ...antiTagSW, autoReply: enabled };
+                                                saveConfig(config);
+                                                await m.reply(`${enabled ? '✅' : '❌'} *Auto Reply ${enabled ? 'diaktifkan' : 'dinonaktifkan'}!*\n\nBot ${enabled ? 'akan' : 'tidak akan'} membalas orang yang tag di status.`);
+
+                                        } else if (args[0] === 'notify') {
+                                                if (!args[1] || !['on', 'off'].includes(args[1])) {
+                                                        await m.reply('Format: .antitagsw notify on / .antitagsw notify off');
+                                                        break;
+                                                }
+                                                const enabled = args[1] === 'on';
+                                                config.antiTagSW = { ...antiTagSW, notifyOwner: enabled };
+                                                saveConfig(config);
+                                                await m.reply(`${enabled ? '✅' : '❌'} *Notifikasi Owner ${enabled ? 'diaktifkan' : 'dinonaktifkan'}!*`);
+
+                                        } else if (args[0] === 'msg') {
+                                                const rawQuery = query.trim();
+                                                const customMsg = rawQuery.replace(/^msg\s+/i, '').trim();
+                                                if (!customMsg) {
+                                                        await m.reply('Format: .antitagsw msg <pesan>\n\nContoh: .antitagsw msg Jangan tag bot di status ya kak 🙏');
+                                                        break;
+                                                }
+                                                config.antiTagSW = { ...antiTagSW, message: customMsg };
+                                                saveConfig(config);
+                                                await m.reply(`✅ *Pesan reply berhasil diperbarui!*\n\n📝 Pesan baru:\n${customMsg}`);
+
+                                        } else {
+                                                await m.reply('❓ Perintah tidak valid.\n\nGunakan *.antitagsw* untuk melihat panduan lengkap.');
+                                        }
+
+                                        logCommand(m, hisoka, 'antitagsw');
+                                } catch (error) {
+                                        console.error('\x1b[31m[AntiTagSW] Error:\x1b[39m', error.message);
                                         await m.reply(`Mohon maaf, terjadi kesalahan: ${error.message}`);
                                 }
                                 break;
