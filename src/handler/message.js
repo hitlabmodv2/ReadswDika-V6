@@ -1454,22 +1454,32 @@ text += `╰═════════════════════╯`;
                                 try {
                                         const config = loadConfig();
                                         const antiDelete = config.antiDelete || { enabled: false, privateChat: false, groupChat: false };
-                                        const args = query ? query.toLowerCase().split(' ') : [];
-                                        
-                                        const bothEnabled = antiDelete.privateChat && antiDelete.groupChat;
-                                        
-                                        if (args.length === 0) {
+                                        const args = query ? query.toLowerCase().trim().split(/\s+/) : [];
+
+                                        if (args.length === 0 || (args.length === 1 && args[0] === '')) {
+                                                const isActive = antiDelete.enabled;
+                                                const pvOn = antiDelete.privateChat;
+                                                const grpOn = antiDelete.groupChat;
+                                                const bothOn = pvOn && grpOn;
+                                                const noneOn = !pvOn && !grpOn;
+
                                                 let text = `╭═══『 *ANTI DELETE* 』═══╮\n`;
 text += `│\n`;
-text += `│ *Status:* ${antiDelete.enabled ? '✅ Aktif' : '❌ Nonaktif'}\n`;
-text += `│ *Private Chat:* ${antiDelete.privateChat ? '✅' : '❌'}\n`;
-text += `│ *Group Chat:* ${antiDelete.groupChat ? '✅' : '❌'}\n`;
+text += `│ *Status:* ${isActive ? '✅ Aktif' : '❌ Nonaktif'}\n`;
+text += `│ *Private Chat:* ${pvOn ? '✅ Aktif' : '❌ Nonaktif'}\n`;
+text += `│ *Group Chat:* ${grpOn ? '✅ Aktif' : '❌ Nonaktif'}\n`;
 text += `│\n`;
-if (bothEnabled && antiDelete.enabled) {
+if (isActive && noneOn) {
+    text += `│ ⚠️ *Perhatian:*\n`;
+    text += `│ Anti Delete aktif tapi Private &\n`;
+    text += `│ Group Chat belum dipilih!\n`;
+    text += `│ Gunakan: .antidel private on\n`;
+    text += `│ atau .antidel group on\n`;
+    text += `│\n`;
+} else if (isActive && bothOn) {
     text += `│ ⚠️ *Catatan:*\n`;
-    text += `│ Private & Group aktif bersamaan\n`;
-    text += `│ dapat menyebabkan banyak notifikasi.\n`;
-    text += `│ Disarankan aktifkan salah satu saja.\n`;
+    text += `│ Private & Group aktif bersamaan,\n`;
+    text += `│ bisa menyebabkan banyak notifikasi.\n`;
     text += `│\n`;
 }
 text += `│ *Info:*\n`;
@@ -1481,7 +1491,8 @@ text += `│ • Teks, Gambar, Video\n`;
 text += `│ • Audio, Sticker, Dokumen\n`;
 text += `│\n`;
 text += `│ *Penggunaan:*\n`;
-text += `│ .antidel on/off\n`;
+text += `│ .antidel on — aktifkan semua\n`;
+text += `│ .antidel off — matikan semua\n`;
 text += `│ .antidel private on/off\n`;
 text += `│ .antidel group on/off\n`;
 text += `│ .antidel all on/off\n`;
@@ -1490,58 +1501,106 @@ text += `╰═════════════════════╯`;
                                                 await m.reply(text);
                                                 break;
                                         }
-                                        
+
                                         if (args[0] === 'on') {
-                                                if (antiDelete.enabled) {
-                                                        await m.reply('ℹ️ Anti Delete sudah aktif sebelumnya, Kak');
-                                                } else {
-                                                        config.antiDelete = { ...antiDelete, enabled: true };
-                                                        saveConfig(config);
-                                                        let reply = '✅ Anti Delete berhasil diaktifkan\n\n📨 Pesan yang dihapus akan dikirim ke chat pribadi bot';
-                                                        if (antiDelete.privateChat && antiDelete.groupChat) {
-                                                                reply += '\n\n⚠️ *Catatan:* Private & Group Chat keduanya aktif. Ini dapat menyebabkan banyak notifikasi.';
-                                                        }
-                                                        await m.reply(reply);
+                                                const newPrivate = antiDelete.privateChat || false;
+                                                const newGroup = antiDelete.groupChat || false;
+                                                const autoEnableBoth = !newPrivate && !newGroup;
+                                                config.antiDelete = {
+                                                        ...antiDelete,
+                                                        enabled: true,
+                                                        privateChat: autoEnableBoth ? true : newPrivate,
+                                                        groupChat: autoEnableBoth ? true : newGroup,
+                                                };
+                                                saveConfig(config);
+                                                let reply = '✅ *Anti Delete diaktifkan!*\n\n';
+                                                reply += `📍 Private Chat: ${config.antiDelete.privateChat ? '✅' : '❌'}\n`;
+                                                reply += `📍 Group Chat: ${config.antiDelete.groupChat ? '✅' : '❌'}\n\n`;
+                                                reply += `📨 Pesan yang dihapus akan dikirim ke chat pribadi bot.`;
+                                                if (autoEnableBoth) {
+                                                        reply += '\n\n💡 Private & Group otomatis diaktifkan karena keduanya belum dipilih.';
                                                 }
+                                                await m.reply(reply);
+
                                         } else if (args[0] === 'off') {
-                                                if (!antiDelete.enabled) {
-                                                        await m.reply('ℹ️ Anti Delete sudah nonaktif sebelumnya, Kak');
-                                                } else {
-                                                        config.antiDelete = { ...antiDelete, enabled: false };
-                                                        saveConfig(config);
-                                                        await m.reply('✅ Anti Delete berhasil dinonaktifkan');
-                                                }
-                                        } else if (args[0] === 'private' && args[1]) {
-                                                const enabled = args[1] === 'on';
-                                                config.antiDelete = { ...antiDelete, privateChat: enabled };
+                                                config.antiDelete = { ...antiDelete, enabled: false, privateChat: false, groupChat: false };
                                                 saveConfig(config);
-                                                let reply = `${enabled ? '✅' : '❌'} Anti Delete untuk Private Chat berhasil ${enabled ? 'diaktifkan' : 'dinonaktifkan'}`;
-                                                if (enabled && antiDelete.groupChat) {
-                                                        reply += '\n\n⚠️ *Catatan:* Private & Group Chat keduanya aktif. Ini dapat menyebabkan banyak notifikasi.';
+                                                await m.reply('✅ *Anti Delete dinonaktifkan!*\n\n❌ Private Chat & Group Chat dimatikan.');
+
+                                        } else if (args[0] === 'private') {
+                                                if (!args[1] || !['on', 'off'].includes(args[1])) {
+                                                        await m.reply('Format: .antidel private on / .antidel private off');
+                                                        break;
+                                                }
+                                                const enabled = args[1] === 'on';
+                                                const newGroupChat = antiDelete.groupChat || false;
+                                                const newEnabled = enabled ? true : (newGroupChat ? true : false);
+                                                config.antiDelete = {
+                                                        ...antiDelete,
+                                                        enabled: newEnabled,
+                                                        privateChat: enabled,
+                                                        groupChat: newGroupChat,
+                                                };
+                                                saveConfig(config);
+                                                let reply = `${enabled ? '✅' : '❌'} *Anti Delete Private Chat ${enabled ? 'diaktifkan' : 'dinonaktifkan'}!*\n\n`;
+                                                reply += `📍 Private Chat: ${enabled ? '✅' : '❌'}\n`;
+                                                reply += `📍 Group Chat: ${newGroupChat ? '✅' : '❌'}\n`;
+                                                reply += `📍 Status Global: ${newEnabled ? '✅ Aktif' : '❌ Nonaktif'}`;
+                                                if (enabled && newGroupChat) {
+                                                        reply += '\n\n⚠️ *Catatan:* Private & Group keduanya aktif, bisa banyak notifikasi.';
                                                 }
                                                 await m.reply(reply);
-                                        } else if (args[0] === 'group' && args[1]) {
+
+                                        } else if (args[0] === 'group') {
+                                                if (!args[1] || !['on', 'off'].includes(args[1])) {
+                                                        await m.reply('Format: .antidel group on / .antidel group off');
+                                                        break;
+                                                }
                                                 const enabled = args[1] === 'on';
-                                                config.antiDelete = { ...antiDelete, groupChat: enabled };
+                                                const newPrivateChat = antiDelete.privateChat || false;
+                                                const newEnabled = enabled ? true : (newPrivateChat ? true : false);
+                                                config.antiDelete = {
+                                                        ...antiDelete,
+                                                        enabled: newEnabled,
+                                                        privateChat: newPrivateChat,
+                                                        groupChat: enabled,
+                                                };
                                                 saveConfig(config);
-                                                let reply = `${enabled ? '✅' : '❌'} Anti Delete untuk Group Chat berhasil ${enabled ? 'diaktifkan' : 'dinonaktifkan'}`;
-                                                if (enabled && antiDelete.privateChat) {
-                                                        reply += '\n\n⚠️ *Catatan:* Private & Group Chat keduanya aktif. Ini dapat menyebabkan banyak notifikasi.';
+                                                let reply = `${enabled ? '✅' : '❌'} *Anti Delete Group Chat ${enabled ? 'diaktifkan' : 'dinonaktifkan'}!*\n\n`;
+                                                reply += `📍 Private Chat: ${newPrivateChat ? '✅' : '❌'}\n`;
+                                                reply += `📍 Group Chat: ${enabled ? '✅' : '❌'}\n`;
+                                                reply += `📍 Status Global: ${newEnabled ? '✅ Aktif' : '❌ Nonaktif'}`;
+                                                if (enabled && newPrivateChat) {
+                                                        reply += '\n\n⚠️ *Catatan:* Private & Group keduanya aktif, bisa banyak notifikasi.';
                                                 }
                                                 await m.reply(reply);
-                                        } else if (args[0] === 'all' && args[1]) {
+
+                                        } else if (args[0] === 'all') {
+                                                if (!args[1] || !['on', 'off'].includes(args[1])) {
+                                                        await m.reply('Format: .antidel all on / .antidel all off');
+                                                        break;
+                                                }
                                                 const enabled = args[1] === 'on';
-                                                config.antiDelete = { ...antiDelete, privateChat: enabled, groupChat: enabled };
+                                                config.antiDelete = {
+                                                        ...antiDelete,
+                                                        enabled: enabled,
+                                                        privateChat: enabled,
+                                                        groupChat: enabled,
+                                                };
                                                 saveConfig(config);
-                                                let reply = `${enabled ? '✅' : '❌'} Anti Delete untuk Private & Group Chat berhasil ${enabled ? 'diaktifkan' : 'dinonaktifkan'}`;
+                                                let reply = `${enabled ? '✅' : '❌'} *Anti Delete ${enabled ? 'diaktifkan' : 'dinonaktifkan'} untuk semua chat!*\n\n`;
+                                                reply += `📍 Private Chat: ${enabled ? '✅' : '❌'}\n`;
+                                                reply += `📍 Group Chat: ${enabled ? '✅' : '❌'}\n`;
+                                                reply += `📍 Status Global: ${enabled ? '✅ Aktif' : '❌ Nonaktif'}`;
                                                 if (enabled) {
-                                                        reply += '\n\n⚠️ *Catatan:* Mengaktifkan keduanya dapat menyebabkan banyak notifikasi. Gunakan dengan bijak ya, Kak.';
+                                                        reply += '\n\n⚠️ *Catatan:* Mengaktifkan keduanya bisa menyebabkan banyak notifikasi.';
                                                 }
                                                 await m.reply(reply);
+
                                         } else {
-                                                await m.reply('Mohon maaf, Kak. Perintah tidak valid.\nGunakan .antidel untuk melihat bantuan.');
+                                                await m.reply('❓ Perintah tidak valid.\n\nGunakan *.antidel* untuk melihat panduan lengkap.');
                                         }
-                                        
+
                                         logCommand(m, hisoka, 'antidel');
                                 } catch (error) {
                                         console.error('\x1b[31m[AntiDelete] Error:\x1b[39m', error.message);
