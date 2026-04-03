@@ -8700,10 +8700,11 @@
     "lid": "222209276645606@lid"
   },
   "6285394015819@s.whatsapp.net": {
+    "id": "37817572917353@lid",
+    "lid": "37817572917353@lid",
     "isContact": true,
-    "id": "6285394015819@s.whatsapp.net",
     "name": "Farid~",
-    "lid": "37817572917353@lid"
+    "notify": "Farid"
   },
   "6283171395206@s.whatsapp.net": {
     "isContact": true,
