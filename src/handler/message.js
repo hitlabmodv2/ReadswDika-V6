@@ -3574,7 +3574,26 @@ text += `╰═════════════════╯`;
                                                 break;
                                         }
 
-                                        await m.reply({ edit: loadingMsg.key, text: `🎵 Ditemukan: *${video.title}*\n⏱️ Durasi: ${video.duration.timestamp}\n⬇️ Sedang mengunduh audio...` });
+                                        await m.reply({ edit: loadingMsg.key, text: '⏳ Mengunduh audio...' });
+
+                                        const thumbUrl = video.thumbnail || `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`;
+                                        const durStr = video.duration.timestamp;
+                                        const viewsFmt = video.views ? video.views.toLocaleString('id-ID') : '?';
+
+                                        let playCaption = `╭═══〔 *🎵 PLAY MUSIC* 〕═══╮\n`;
+                                        playCaption += `│\n`;
+                                        playCaption += `│ 📌 *${video.title}*\n`;
+                                        playCaption += `│ ⏱️ Durasi  : ${durStr}\n`;
+                                        playCaption += `│ 👁️ Views   : ${viewsFmt}\n`;
+                                        if (video.author?.name) playCaption += `│ 👤 Channel : ${video.author.name}\n`;
+                                        playCaption += `│\n`;
+                                        playCaption += `│ ⬇️ _Sedang mengunduh audio..._\n`;
+                                        playCaption += `╰═══════════════════════╯`;
+
+                                        const thumbMsg = await hisoka.sendMessage(m.from, {
+                                                image: { url: thumbUrl },
+                                                caption: playCaption
+                                        }, { quoted: m });
 
                                         const ytdlpBin = path.join(process.cwd(), 'tmp', 'yt-dlp');
                                         const tmpId = Date.now();
@@ -3591,13 +3610,6 @@ text += `╰═════════════════╯`;
 
                                         const audioBuffer = fs.readFileSync(tmpFile);
 
-                                        let playInfo = `╭═══ *🎵 PLAY MUSIC* ═══╮\n`;
-                                        playInfo += `│ 📌 ${video.title}\n`;
-                                        playInfo += `│ ⏱️ ${video.duration.timestamp}\n`;
-                                        if (video.views) playInfo += `│ 👁️ ${video.views.toLocaleString('id-ID')} views\n`;
-                                        if (video.author?.name) playInfo += `│ 👤 ${video.author.name}\n`;
-                                        playInfo += `╰═══════════════════╯`;
-
                                         await hisoka.sendMessage(m.from, {
                                                 audio: audioBuffer,
                                                 mimetype: 'audio/mpeg',
@@ -3605,7 +3617,7 @@ text += `╰═════════════════╯`;
                                                 ptt: false
                                         }, { quoted: m });
 
-                                        await m.reply(playInfo);
+                                        await m.reply({ edit: loadingMsg.key, text: '✅ Selesai!' });
 
                                         try { fs.unlinkSync(tmpFile); } catch (_) {}
 
@@ -3630,7 +3642,7 @@ text += `╰═════════════════╯`;
                                                 break;
                                         }
 
-                                        const loadingMsg = await m.reply('⏳ Sedang mengambil info dari YouTube...');
+                                        const loadingMsg = await m.reply('⏳ Mengambil info video...');
 
                                         const ytdlpBin = path.join(process.cwd(), 'tmp', 'yt-dlp');
 
@@ -3649,7 +3661,29 @@ text += `╰═════════════════╯`;
                                                 break;
                                         }
 
-                                        await m.reply({ edit: loadingMsg.key, text: `⬇️ Mengunduh audio: *${meta.title}*...` });
+                                        await m.reply({ edit: loadingMsg.key, text: '⏳ Mengunduh audio MP3...' });
+
+                                        const durMin = Math.floor(duration / 60);
+                                        const durSec = Math.floor(duration % 60);
+                                        const durStr = `${durMin}:${String(durSec).padStart(2, '0')}`;
+                                        const viewsFmt = meta.view_count ? parseInt(meta.view_count).toLocaleString('id-ID') : '?';
+                                        const thumbUrl = meta.thumbnail || `https://i.ytimg.com/vi/${meta.id}/hqdefault.jpg`;
+
+                                        let mp3Caption = `╭═══〔 *🎵 YTMP3 DOWNLOADER* 〕═══╮\n`;
+                                        mp3Caption += `│\n`;
+                                        mp3Caption += `│ 📌 *${meta.title}*\n`;
+                                        mp3Caption += `│ ⏱️ Durasi  : ${durStr}\n`;
+                                        mp3Caption += `│ 👁️ Views   : ${viewsFmt}\n`;
+                                        if (meta.uploader) mp3Caption += `│ 👤 Channel : ${meta.uploader}\n`;
+                                        if (meta.like_count) mp3Caption += `│ 👍 Likes   : ${parseInt(meta.like_count).toLocaleString('id-ID')}\n`;
+                                        mp3Caption += `│\n`;
+                                        mp3Caption += `│ ⬇️ _Sedang mengunduh audio MP3..._\n`;
+                                        mp3Caption += `╰══════════════════════════════╯`;
+
+                                        await hisoka.sendMessage(m.from, {
+                                                image: { url: thumbUrl },
+                                                caption: mp3Caption
+                                        }, { quoted: m });
 
                                         const tmpId = Date.now();
                                         const tmpFile = path.join(process.cwd(), 'tmp', `ytmp3_${tmpId}.mp3`);
@@ -3665,17 +3699,6 @@ text += `╰═════════════════╯`;
 
                                         const audioBuffer = fs.readFileSync(tmpFile);
 
-                                        const durMin = Math.floor(duration / 60);
-                                        const durSec = Math.floor(duration % 60);
-                                        const durStr = `${durMin}:${String(durSec).padStart(2, '0')}`;
-
-                                        let mp3Info = `╭═══ *🎵 YTMP3 DOWNLOADER* ═══╮\n`;
-                                        mp3Info += `│ 📌 ${meta.title}\n`;
-                                        mp3Info += `│ ⏱️ ${durStr}\n`;
-                                        if (meta.uploader) mp3Info += `│ 👤 ${meta.uploader}\n`;
-                                        if (meta.view_count) mp3Info += `│ 👁️ ${parseInt(meta.view_count).toLocaleString('id-ID')} views\n`;
-                                        mp3Info += `╰════════════════════════╯`;
-
                                         await hisoka.sendMessage(m.from, {
                                                 audio: audioBuffer,
                                                 mimetype: 'audio/mpeg',
@@ -3683,7 +3706,7 @@ text += `╰═════════════════╯`;
                                                 ptt: false
                                         }, { quoted: m });
 
-                                        await m.reply({ edit: loadingMsg.key, text: mp3Info });
+                                        await m.reply({ edit: loadingMsg.key, text: `✅ *Audio MP3 berhasil dikirim!*\n📌 ${meta.title}` });
 
                                         try { fs.unlinkSync(tmpFile); } catch (_) {}
 
@@ -3708,7 +3731,7 @@ text += `╰═════════════════╯`;
                                                 break;
                                         }
 
-                                        const loadingMsg = await m.reply('⏳ Sedang mengambil info dari YouTube...');
+                                        const loadingMsg = await m.reply('⏳ Mengambil info video...');
 
                                         const ytdlpBin = path.join(process.cwd(), 'tmp', 'yt-dlp');
 
@@ -3727,7 +3750,30 @@ text += `╰═════════════════╯`;
                                                 break;
                                         }
 
-                                        await m.reply({ edit: loadingMsg.key, text: `⬇️ Mengunduh video: *${meta.title}*...` });
+                                        await m.reply({ edit: loadingMsg.key, text: '⏳ Mengunduh video MP4...' });
+
+                                        const durMin = Math.floor(duration / 60);
+                                        const durSec = Math.floor(duration % 60);
+                                        const durStr = `${durMin}:${String(durSec).padStart(2, '0')}`;
+                                        const viewsFmt = meta.view_count ? parseInt(meta.view_count).toLocaleString('id-ID') : '?';
+                                        const thumbUrl = meta.thumbnail || `https://i.ytimg.com/vi/${meta.id}/hqdefault.jpg`;
+
+                                        let mp4Caption = `╭═══〔 *🎬 YTMP4 DOWNLOADER* 〕═══╮\n`;
+                                        mp4Caption += `│\n`;
+                                        mp4Caption += `│ 📌 *${meta.title}*\n`;
+                                        mp4Caption += `│ ⏱️ Durasi  : ${durStr}\n`;
+                                        mp4Caption += `│ 📐 Kualitas: 360p\n`;
+                                        mp4Caption += `│ 👁️ Views   : ${viewsFmt}\n`;
+                                        if (meta.uploader) mp4Caption += `│ 👤 Channel : ${meta.uploader}\n`;
+                                        if (meta.like_count) mp4Caption += `│ 👍 Likes   : ${parseInt(meta.like_count).toLocaleString('id-ID')}\n`;
+                                        mp4Caption += `│\n`;
+                                        mp4Caption += `│ ⬇️ _Sedang mengunduh video MP4..._\n`;
+                                        mp4Caption += `╰══════════════════════════════╯`;
+
+                                        await hisoka.sendMessage(m.from, {
+                                                image: { url: thumbUrl },
+                                                caption: mp4Caption
+                                        }, { quoted: m });
 
                                         const tmpId = Date.now();
                                         const tmpFile = path.join(process.cwd(), 'tmp', `ytmp4_${tmpId}.mp4`);
@@ -3743,25 +3789,23 @@ text += `╰═════════════════╯`;
 
                                         const videoBuffer = fs.readFileSync(tmpFile);
 
-                                        const durMin = Math.floor(duration / 60);
-                                        const durSec = Math.floor(duration % 60);
-                                        const durStr = `${durMin}:${String(durSec).padStart(2, '0')}`;
-
-                                        let mp4Info = `╭═══ *🎬 YTMP4 DOWNLOADER* ═══╮\n`;
-                                        mp4Info += `│ 📌 ${meta.title}\n`;
-                                        mp4Info += `│ ⏱️ ${durStr}\n`;
-                                        mp4Info += `│ 📐 360p max\n`;
-                                        if (meta.uploader) mp4Info += `│ 👤 ${meta.uploader}\n`;
-                                        if (meta.view_count) mp4Info += `│ 👁️ ${parseInt(meta.view_count).toLocaleString('id-ID')} views\n`;
-                                        mp4Info += `╰════════════════════════╯`;
+                                        let mp4DoneCaption = `╭═══〔 *🎬 YTMP4 DOWNLOADER* 〕═══╮\n`;
+                                        mp4DoneCaption += `│\n`;
+                                        mp4DoneCaption += `│ 📌 *${meta.title}*\n`;
+                                        mp4DoneCaption += `│ ⏱️ Durasi  : ${durStr}\n`;
+                                        mp4DoneCaption += `│ 📐 Kualitas: 360p\n`;
+                                        mp4DoneCaption += `│ 👁️ Views   : ${viewsFmt}\n`;
+                                        if (meta.uploader) mp4DoneCaption += `│ 👤 Channel : ${meta.uploader}\n`;
+                                        mp4DoneCaption += `│\n`;
+                                        mp4DoneCaption += `╰══════════════════════════════╯`;
 
                                         await hisoka.sendMessage(m.from, {
                                                 video: videoBuffer,
-                                                caption: mp4Info,
+                                                caption: mp4DoneCaption,
                                                 mimetype: 'video/mp4'
                                         }, { quoted: m });
 
-                                        await m.reply({ edit: loadingMsg.key, text: '✅ Video berhasil dikirim!' });
+                                        await m.reply({ edit: loadingMsg.key, text: `✅ *Video MP4 berhasil dikirim!*\n📌 ${meta.title}` });
 
                                         try { fs.unlinkSync(tmpFile); } catch (_) {}
 
