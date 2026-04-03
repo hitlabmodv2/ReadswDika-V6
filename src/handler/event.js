@@ -219,45 +219,59 @@ export default async function (m, hisoka) {
                                 })();
                         }
                 }
-                // ini baru
-                if (!m.isOwner && m.key?.remoteJid === 'status@broadcast' && m.message && m.type && m.type !== 'protocolMessage' && m.type !== 'reactionMessage') { // sampe sini
-                        const config = loadConfig();
-
-                        // ─── ANTI TAG STATUS WA ───────────────────────────────
-                        // Jalankan dulu, terpisah dari storyConfig, agar tidak
-                        // terpengaruh oleh return dari autoReadStory di bawah.
-                        const antiTagSW = config.antiTagSW || {};
+                // ─── ANTI TAG STATUS WA ──────────────────────────────────────
+                // Blok ini berdiri sendiri — tidak bergantung pada !m.isOwner,
+                // agar bisa mendeteksi tag dari siapa saja (termasuk owner).
+                if (!m.key?.fromMe && m.key?.remoteJid === 'status@broadcast' && m.message && m.type && m.type !== 'protocolMessage' && m.type !== 'reactionMessage') {
+                        const _cfg = loadConfig();
+                        const antiTagSW = _cfg.antiTagSW || {};
                         if (antiTagSW.enabled) {
                                 try {
-                                        const botJid = jidNormalizedUser(hisoka.user.id);
+                                        const botJid    = jidNormalizedUser(hisoka.user.id);
+                                        const botNumber = jidDecode(botJid)?.user || '';
+                                        const rawMsg    = m.raw || {};
 
-                                        // Gunakan m.mentions yang sudah di-resolve oleh injectEndMessage
-                                        // Ini mencakup: contextInfo.mentionedJid + statusMentions + LID resolution
-                                        const allMentions = Array.isArray(m.mentions) ? m.mentions : [];
-
-                                        // Fallback manual jika m.mentions belum terisi
-                                        const contextMentions = m.content?.contextInfo?.mentionedJid || [];
-                                        const rawMsg = m.raw || m.message || {};
-                                        const fallbackMentions = [
-                                                ...(rawMsg.imageMessage?.contextInfo?.mentionedJid || []),
-                                                ...(rawMsg.videoMessage?.contextInfo?.mentionedJid || []),
-                                                ...(rawMsg.extendedTextMessage?.contextInfo?.mentionedJid || []),
-                                                ...contextMentions,
+                                        // Kumpulkan mention dari SEMUA kemungkinan lokasi Baileys:
+                                        // 1. m.mentions  — sudah di-resolve oleh injectEndMessage
+                                        // 2. m.statusMentionedJids — field top-level WAMessage (WhatsApp baru)
+                                        // 3. contextInfo.mentionedJid dari setiap jenis pesan
+                                        // 4. statusMentionedJids di dalam content pesan itu sendiri
+                                        const allMentionsRaw = [
+                                                ...(Array.isArray(m.mentions) ? m.mentions : []),
+                                                ...(Array.isArray(m.statusMentionedJids) ? m.statusMentionedJids : []),
+                                                ...(m.content?.contextInfo?.mentionedJid   || []),
+                                                ...(m.content?.statusMentionedJids         || []),
+                                                ...(rawMsg.imageMessage?.contextInfo?.mentionedJid         || []),
+                                                ...(rawMsg.imageMessage?.statusMentionedJids               || []),
+                                                ...(rawMsg.videoMessage?.contextInfo?.mentionedJid         || []),
+                                                ...(rawMsg.videoMessage?.statusMentionedJids               || []),
+                                                ...(rawMsg.extendedTextMessage?.contextInfo?.mentionedJid  || []),
+                                                ...(rawMsg.extendedTextMessage?.statusMentionedJids        || []),
                                         ];
 
-                                        const combinedMentions = allMentions.length > 0 ? allMentions : fallbackMentions;
-                                        const isBotTagged = combinedMentions.some(jid => {
-                                                try { return jidNormalizedUser(jid) === botJid; } catch { return false; }
+                                        // Log debug hanya jika ada mention (mengurangi noise di konsol)
+                                        if (allMentionsRaw.length > 0) {
+                                                console.log(`\x1b[35m[AntiTagSW DEBUG]\x1b[0m Status dari ${m.pushName || m.sender} ada mention:`, JSON.stringify(allMentionsRaw));
+                                        }
+
+                                        const isBotTagged = allMentionsRaw.some(jid => {
+                                                try {
+                                                        if (!jid) return false;
+                                                        const normalized = jidNormalizedUser(jid);
+                                                        return normalized === botJid ||
+                                                               jid.includes(botNumber) ||
+                                                               normalized.includes(botNumber);
+                                                } catch { return false; }
                                         });
 
                                         if (isBotTagged) {
-                                                const taggerJid = jidNormalizedUser(m.participant || m.sender);
+                                                // m.sender sudah di-resolve dari LID ke nomor HP oleh resolveLidToPN
+                                                const taggerJid    = jidNormalizedUser(m.sender);
                                                 const taggerNumber = jidDecode(taggerJid)?.user || 'Unknown';
-                                                const taggerName = m.pushName || hisoka.getName(taggerJid, true) || taggerNumber;
+                                                const taggerName   = m.pushName || hisoka.getName(taggerJid, true) || taggerNumber;
 
                                                 console.log(`\x1b[33m[AntiTagSW]\x1b[0m \x1b[1m${taggerName}\x1b[0m (${taggerNumber}) men-tag bot di status`);
 
-                                                // Auto-reply ke pengirim
                                                 if (antiTagSW.autoReply !== false) {
                                                         const replyMsg = antiTagSW.message || 'Hei kak! Tolong jangan tag bot di status WhatsApp ya 🙏';
                                                         await hisoka.sendMessage(taggerJid, { text: replyMsg }).catch(err => {
@@ -265,9 +279,8 @@ export default async function (m, hisoka) {
                                                         });
                                                 }
 
-                                                // Notifikasi ke owner
                                                 if (antiTagSW.notifyOwner !== false) {
-                                                        const owners = (config.owners || []).map(n => `${n}@s.whatsapp.net`);
+                                                        const owners   = (_cfg.owners || []).map(n => `${n}@s.whatsapp.net`);
                                                         const notifText = `🔔 *[ANTI TAG STATUS]*\n\nSeseorang men-tag bot di status WA mereka!\n\n👤 *Nama:* ${taggerName}\n📞 *Nomor:* ${taggerNumber}\n🕐 *Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`;
                                                         for (const ownerJid of owners) {
                                                                 await hisoka.sendMessage(ownerJid, { text: notifText }).catch(() => {});
@@ -278,7 +291,12 @@ export default async function (m, hisoka) {
                                         console.error('\x1b[31m[AntiTagSW] Error:\x1b[39m', tagErr.message);
                                 }
                         }
-                        // ─────────────────────────────────────────────────────
+                }
+                // ─────────────────────────────────────────────────────────────
+
+                // ini baru
+                if (!m.isOwner && m.key?.remoteJid === 'status@broadcast' && m.message && m.type && m.type !== 'protocolMessage' && m.type !== 'reactionMessage') { // sampe sini
+                        const config = loadConfig();
 
                         const storyConfig = config.autoReadStory || {};
                         
