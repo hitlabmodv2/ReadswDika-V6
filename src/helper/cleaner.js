@@ -182,11 +182,94 @@ export function startAutoCleaner(intervalHours = 6) {
     return interval;
 }
 
+/**
+ * Bersihkan pre-key files yang sudah terpakai (stale) dari session Baileys.
+ * Pre-key dengan ID < firstUnuploadedPreKeyId sudah dikonsumsi WhatsApp
+ * dan tidak dibutuhkan lagi — aman untuk dihapus.
+ * Ini mencegah akumulasi ratusan file kecil yang memperlambat startup.
+ */
+export function cleanStaleSessionFiles(sessionDir) {
+    try {
+        const credsPath = path.join(sessionDir, 'creds.json')
+        if (!fs.existsSync(credsPath)) return
+
+        const creds = JSON.parse(fs.readFileSync(credsPath, 'utf-8'))
+        const firstUnuploaded = creds.firstUnuploadedPreKeyId ?? creds.nextPreKeyId ?? 0
+        if (!firstUnuploaded || firstUnuploaded <= 0) return
+
+        const files = fs.readdirSync(sessionDir)
+        let deletedPreKeys = 0
+        let deletedSessions = 0
+        let deletedSize = 0
+        const now = Date.now()
+        const SESSION_MAX_AGE = 30 * 24 * 60 * 60 * 1000 // 30 hari
+
+        for (const file of files) {
+            const filePath = path.join(sessionDir, file)
+
+            // Hapus pre-key lama yang sudah terpakai
+            if (file.startsWith('pre-key-') && file.endsWith('.json')) {
+                const idStr = file.replace('pre-key-', '').replace('.json', '')
+                const id = parseInt(idStr, 10)
+                if (!isNaN(id) && id < firstUnuploaded) {
+                    try {
+                        const stat = fs.statSync(filePath)
+                        deletedSize += stat.size
+                        fs.unlinkSync(filePath)
+                        deletedPreKeys++
+                    } catch {}
+                }
+                continue
+            }
+
+            // Hapus session-* yang sudah lebih dari 30 hari tidak dipakai
+            if (file.startsWith('session-') && file.endsWith('.json')) {
+                try {
+                    const stat = fs.statSync(filePath)
+                    if (now - stat.mtimeMs > SESSION_MAX_AGE) {
+                        deletedSize += stat.size
+                        fs.unlinkSync(filePath)
+                        deletedSessions++
+                    }
+                } catch {}
+                continue
+            }
+
+            // Hapus sender-key-* yang sudah lebih dari 30 hari tidak dipakai
+            if (file.startsWith('sender-key-') && file.endsWith('.json')) {
+                try {
+                    const stat = fs.statSync(filePath)
+                    if (now - stat.mtimeMs > SESSION_MAX_AGE) {
+                        deletedSize += stat.size
+                        fs.unlinkSync(filePath)
+                    }
+                } catch {}
+            }
+        }
+
+        const total = deletedPreKeys + deletedSessions
+        if (total > 0) {
+            const sizeStr = formatBytes(deletedSize)
+            console.log(
+                `\x1b[32m[SessionCleaner]\x1b[39m` +
+                ` Hapus ${deletedPreKeys} pre-key stale` +
+                (deletedSessions > 0 ? ` + ${deletedSessions} session lama` : '') +
+                ` → hemat ${sizeStr}`
+            )
+        } else {
+            console.log(`\x1b[32m[SessionCleaner]\x1b[39m Session sudah bersih`)
+        }
+    } catch (err) {
+        console.error(`\x1b[31m[SessionCleaner]\x1b[39m Error:`, err.message)
+    }
+}
+
 export default {
     ensureTmpDir,
     getTmpPath,
     clearTmpFolder,
     clearOldFiles,
     getTmpStats,
-    startAutoCleaner
+    startAutoCleaner,
+    cleanStaleSessionFiles
 };

@@ -38,7 +38,7 @@ import { injectClient } from './src/helper/inject.js';
 import { getCaseName, loadConfig } from './src/helper/utils.js';
 import { MemoryMonitor } from './src/helper/memoryMonitor.js';
 import { getPhoneRegion, formatPhoneWithRegion } from './src/helper/phoneRegion.js';
-import { ensureTmpDir, startAutoCleaner } from './src/helper/cleaner.js'; // ini baru
+import { ensureTmpDir, startAutoCleaner, cleanStaleSessionFiles } from './src/helper/cleaner.js'; // ini baru
 import { startJadibot, jadibotMap } from './src/helper/jadibot.js';
 import { saveViewOnceCache, cleanOldViewOnceCache, hasViewOnceCache } from './src/helper/voCache.js';
 // ini baru - yg bawah pindah ke sini
@@ -279,6 +279,10 @@ async function main() {
         if (reconnectCount > 0) {
                 console.warn(`\x1b[33mReconnecting... Attempt ${reconnectCount}\x1b[39m`);
         }
+
+        // Bersihkan pre-key stale & session lama SEBELUM load state
+        // Ini yang menyebabkan delay parah setelah offline lama
+        cleanStaleSessionFiles(sessionDir)
 
         const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
         const { version, isLatest } = await fetchLatestBaileysVersion();
