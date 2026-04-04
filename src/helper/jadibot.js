@@ -6,7 +6,6 @@ import makeWASocket, {
   DisconnectReason,
   jidNormalizedUser,
   delay,
-  proto,
   generateWAMessageFromContent
 } from 'baileys'
 
@@ -178,38 +177,36 @@ async function sendPairingWithButton(code, number, mainSock, senderJid, sendRepl
 
   if (mainSock && senderJid) {
     try {
-      const interactiveMessage = proto.Message.InteractiveMessage.create({
-        header: proto.Message.InteractiveMessage.Header.create({
-          hasMediaAttachment: false,
-          title: '🤖 J A D I B O T'
-        }),
-        body: proto.Message.InteractiveMessage.Body.create({
-          text: bodyText
-        }),
-        footer: proto.Message.InteractiveMessage.Footer.create({
-          text: footerText
-        }),
-        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-          buttons: [
-            {
-              name: 'cta_copy',
-              buttonParamsJson: JSON.stringify({
-                display_text: '📋 Salin Kode',
-                copy_code: rawCode
-              })
-            }
-          ],
-          messageParamsJson: ''
-        })
-      })
-
       const msg = generateWAMessageFromContent(
         senderJid,
-        { interactiveMessage },
+        {
+          interactiveMessage: {
+            header: {
+              title: '🤖 J A D I B O T',
+              hasMediaAttachment: false
+            },
+            body: { text: bodyText },
+            footer: { text: footerText },
+            nativeFlowMessage: {
+              buttons: [
+                {
+                  name: 'cta_copy',
+                  buttonParamsJson: JSON.stringify({
+                    display_text: '📋 Salin Kode',
+                    copy_code: rawCode
+                  })
+                }
+              ],
+              messageParamsJson: '',
+              messageVersion: 1
+            }
+          }
+        },
         { userJid: mainSock.user.id }
       )
 
       await mainSock.relayMessage(senderJid, msg.message, { messageId: msg.key.id })
+      console.log(`[JADIBOT] ✅ Tombol salin kode berhasil dikirim ke ${senderJid}`)
       return
     } catch (err) {
       console.error('[JADIBOT] Tombol salin gagal, fallback ke teks:', err.message)
