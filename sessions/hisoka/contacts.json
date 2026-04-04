@@ -23587,7 +23587,8 @@
     "lid": "131061380042825@lid",
     "isContact": true,
     "name": "√𝘚𝘩𝘦𝘯𝘢𝘢",
-    "notify": "アダウォン"
+    "notify": "アダウォン",
+    "imgUrl": "changed"
   },
   "6283861981441@s.whatsapp.net": {
     "isContact": true,
@@ -26725,7 +26726,7 @@
     "imgUrl": "changed"
   },
   "6289688206739@s.whatsapp.net": {
-    "id": "81582920577063@lid",
+    "id": "6289688206739@s.whatsapp.net",
     "lid": "81582920577063@lid",
     "notify": "Wily"
   },
@@ -26733,8 +26734,8 @@
     "id": "97968623505429@lid",
     "lid": "97968623505429@lid",
     "notify": "Hen V2",
-    "ephemeralSettingTimestamp": 0,
-    "ephemeralDuration": null
+    "ephemeralSettingTimestamp": 1765714640,
+    "ephemeralDuration": 604800
   },
   "22226673909857@lid": {
     "id": "22226673909857@lid",
@@ -26780,8 +26781,7 @@
   "6285175463174@s.whatsapp.net": {
     "id": "156182794784889@lid",
     "lid": "156182794784889@lid",
-    "notify": "sunshine.jpeg",
-    "verifiedName": "sunshine.jpeg"
+    "notify": "sunshine.jpeg"
   },
   "237499041456266@lid": {
     "id": "237499041456266@lid",
@@ -27512,6 +27512,26 @@
   "180058182393895@lid": {
     "id": "180058182393895@lid",
     "lid": "180058182393895@lid",
+    "imgUrl": "changed"
+  },
+  "91813599780869@lid": {
+    "id": "91813599780869@lid",
+    "lid": "91813599780869@lid",
+    "imgUrl": "changed"
+  },
+  "246157896880216@lid": {
+    "id": "246157896880216@lid",
+    "lid": "246157896880216@lid",
+    "imgUrl": "changed"
+  },
+  "250934001180818@lid": {
+    "id": "250934001180818@lid",
+    "lid": "250934001180818@lid",
+    "imgUrl": "changed"
+  },
+  "238770771230817@lid": {
+    "id": "238770771230817@lid",
+    "lid": "238770771230817@lid",
     "imgUrl": "changed"
   }
 }

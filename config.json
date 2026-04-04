@@ -37,7 +37,7 @@
     "groupChat": true
   },
   "antiDelete": {
-    "enabled": false,
+    "enabled": true,
     "privateChat": true,
     "groupChat": true
   },

@@ -126,14 +126,79 @@ async function downloadMedia(hisoka, cachedMsg, messageContent) {
         }
 }
 
+/* ======= KIRIM PESAN KE TARGET SESUAI SETTING sendTo ======= */
+async function sendToTargets(hisoka, targets, type, messageContent, headerText, ext) {
+        const content = messageContent[type];
+        const mediaTypes = ['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'];
+        const isMediaMessage = mediaTypes.includes(type);
+
+        for (const target of targets) {
+                try {
+                        if (!isMediaMessage) {
+                                await hisoka.sendMessage(target, { text: headerText });
+                                continue;
+                        }
+
+                        const mediaBuffer = await downloadMedia(hisoka, null, messageContent).catch(() => null);
+
+                        // Pakai downloadMedia dari cachedMsg langsung
+                        if (!mediaBuffer) {
+                                await hisoka.sendMessage(target, {
+                                        text: headerText + '\n\n⚠️ _Media tidak dapat diunduh_'
+                                });
+                                continue;
+                        }
+
+                        let mediaExt = ext;
+                        if (content?.mimetype) {
+                                if (content.mimetype.includes('webp')) mediaExt = 'webp';
+                                else if (content.mimetype.includes('mp4')) mediaExt = 'mp4';
+                                else if (content.mimetype.includes('jpeg') || content.mimetype.includes('jpg')) mediaExt = 'jpg';
+                                else if (content.mimetype.includes('png')) mediaExt = 'png';
+                                else if (content.mimetype.includes('gif')) mediaExt = 'gif';
+                                else if (content.mimetype.includes('mp3')) mediaExt = 'mp3';
+                                else if (content.mimetype.includes('ogg')) mediaExt = 'ogg';
+                                else if (content.mimetype.includes('pdf')) mediaExt = 'pdf';
+                        }
+                        if (content?.fileName) {
+                                const docExt = content.fileName.split('.').pop();
+                                if (docExt) mediaExt = docExt;
+                        }
+
+                        if (type === 'imageMessage') {
+                                await hisoka.sendMessage(target, { image: mediaBuffer, caption: headerText });
+                        } else if (type === 'videoMessage') {
+                                await hisoka.sendMessage(target, { video: mediaBuffer, caption: headerText });
+                        } else if (type === 'audioMessage') {
+                                await hisoka.sendMessage(target, { text: headerText });
+                                await hisoka.sendMessage(target, {
+                                        audio: mediaBuffer,
+                                        mimetype: content?.mimetype || 'audio/mpeg',
+                                        ptt: content?.ptt || false,
+                                });
+                        } else if (type === 'stickerMessage') {
+                                await hisoka.sendMessage(target, { text: headerText });
+                                await hisoka.sendMessage(target, { sticker: mediaBuffer });
+                        } else if (type === 'documentMessage') {
+                                await hisoka.sendMessage(target, { text: headerText });
+                                await hisoka.sendMessage(target, {
+                                        document: mediaBuffer,
+                                        mimetype: content?.mimetype || 'application/octet-stream',
+                                        fileName: content?.fileName || `document.${mediaExt}`,
+                                });
+                        }
+                } catch (sendErr) {
+                        console.error('\x1b[31m[AntiDelete] Error sending to', target, ':\x1b[39m', sendErr.message);
+                }
+        }
+}
+
 export default async function handleDeletedMessage(update, hisoka) {
         try {
                 const config = loadConfig();
                 const antiDeleteConfig = config.antiDelete || {};
                 
-                if (!antiDeleteConfig.enabled) {
-                        return;
-                }
+                if (!antiDeleteConfig.enabled) return;
                 
                 const { key, update: msgUpdate } = update;
                 
@@ -146,25 +211,17 @@ export default async function handleDeletedMessage(update, hisoka) {
                 if (!isRevoked) return;
                 
                 const cachedMsg = hisoka.cacheMsg.get(key.id);
-                if (!cachedMsg) {
-                        return;
-                }
+                if (!cachedMsg) return;
                 
                 const from = key.remoteJid;
                 const isGroup = isJidGroup(from);
                 const isPrivate = isPnUser(from);
                 
-                if (isGroup && !antiDeleteConfig.groupChat) {
-                        return;
-                }
-                
-                if (isPrivate && !antiDeleteConfig.privateChat) {
-                        return;
-                }
+                if (isGroup && !antiDeleteConfig.groupChat) return;
+                if (isPrivate && !antiDeleteConfig.privateChat) return;
                 
                 const botNumber = jidNormalizedUser(hisoka.user.id);
                 
-                const rawSenderJid = cachedMsg.key?.participant || cachedMsg.key?.remoteJid;
                 const senderJid = await hisoka.resolveLidToPN(cachedMsg.key);
                 const senderNumber = jidDecode(senderJid)?.user || 'Unknown';
                 const senderName = cachedMsg.pushName || hisoka.getName(senderJid, true) || senderNumber;
@@ -182,115 +239,128 @@ export default async function handleDeletedMessage(update, hisoka) {
                 const [typeName, typeEmoji, ext] = getMediaTypeInfo(type);
                 const text = extractTextFromMessage(messageContent);
                 const timestamp = cachedMsg.messageTimestamp || Math.floor(Date.now() / 1000);
-                
-                let headerText = `═══════════════════════════
-🗑️ *PESAN DIHAPUS TERDETEKSI*
-═══════════════════════════
 
-📍 *Lokasi:* ${isGroup ? `Grup "${groupName}"` : 'Chat Pribadi'}
-👤 *Pengirim:* ${senderName}
-📞 *Nomor:* ${senderNumber}
-⏰ *Waktu:* ${formatTimestamp(timestamp)}
-📦 *Tipe:* ${typeEmoji} ${typeName}`;
+                /* ===== TENTUKAN TARGET PENGIRIMAN ===== */
+                // sendTo: "self" (ke saved messages bot) | "chat" (ke grup/chat asal) | "both"
+                const sendTo = antiDeleteConfig.sendTo || 'self';
+                const targets = []
+
+                if (sendTo === 'self' || sendTo === 'both') {
+                        targets.push(botNumber)
+                }
+                if ((sendTo === 'chat' || sendTo === 'both') && from) {
+                        // Hanya kirim ke chat asal jika belum ada botNumber (hindari duplikat)
+                        if (!targets.includes(from)) targets.push(from)
+                }
+                // Fallback jika kosong
+                if (targets.length === 0) targets.push(botNumber)
+
+                /* ===== BUAT HEADER PESAN ===== */
+                // Header berbeda tergantung apakah dikirim ke chat asal atau ke self
+                const isSendingToChat = sendTo === 'chat' || sendTo === 'both';
+
+                let headerText = `╔══════════════════════════╗\n` +
+                        `║  🗑️  *PESAN DIHAPUS*  🗑️  ║\n` +
+                        `╚══════════════════════════╝\n\n` +
+                        `📍 *Lokasi:* ${isGroup ? `Grup "${groupName}"` : 'Chat Pribadi'}\n` +
+                        `👤 *Pengirim:* ${senderName}\n` +
+                        `📞 *Nomor:* +${senderNumber}\n` +
+                        `⏰ *Waktu:* ${formatTimestamp(timestamp)}\n` +
+                        `📦 *Tipe:* ${typeEmoji} ${typeName}`;
 
                 if (text) {
                         headerText += `\n\n💬 *Isi Pesan:*\n${text}`;
                 }
-                
-                headerText += '\n\n═══════════════════════════';
-                
+
+                headerText += '\n\n══════════════════════════';
+
+                /* ===== KIRIM KE SEMUA TARGET ===== */
                 const mediaTypes = ['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'];
                 const isMediaMessage = mediaTypes.includes(type);
-                
-                if (isMediaMessage) {
-                        const mediaBuffer = await downloadMedia(hisoka, cachedMsg, messageContent);
-                        
-                        if (mediaBuffer) {
-                                try {
-                                        let mediaExt = ext;
-                                        const content = messageContent[type];
-                                        
-                                        if (content?.mimetype) {
-                                                if (content.mimetype.includes('webp')) mediaExt = 'webp';
-                                                else if (content.mimetype.includes('mp4')) mediaExt = 'mp4';
-                                                else if (content.mimetype.includes('jpeg') || content.mimetype.includes('jpg')) mediaExt = 'jpg';
-                                                else if (content.mimetype.includes('png')) mediaExt = 'png';
-                                                else if (content.mimetype.includes('gif')) mediaExt = 'gif';
-                                                else if (content.mimetype.includes('mp3')) mediaExt = 'mp3';
-                                                else if (content.mimetype.includes('ogg')) mediaExt = 'ogg';
-                                                else if (content.mimetype.includes('pdf')) mediaExt = 'pdf';
+
+                for (const target of targets) {
+                        try {
+                                if (!isMediaMessage) {
+                                        await hisoka.sendMessage(target, { text: headerText });
+                                        continue;
+                                }
+
+                                const mediaBuffer = await downloadMedia(hisoka, cachedMsg, messageContent);
+
+                                if (mediaBuffer) {
+                                        try {
+                                                const content = messageContent[type];
+                                                let mediaExt = ext;
+
+                                                if (content?.mimetype) {
+                                                        if (content.mimetype.includes('webp')) mediaExt = 'webp';
+                                                        else if (content.mimetype.includes('mp4')) mediaExt = 'mp4';
+                                                        else if (content.mimetype.includes('jpeg') || content.mimetype.includes('jpg')) mediaExt = 'jpg';
+                                                        else if (content.mimetype.includes('png')) mediaExt = 'png';
+                                                        else if (content.mimetype.includes('gif')) mediaExt = 'gif';
+                                                        else if (content.mimetype.includes('mp3')) mediaExt = 'mp3';
+                                                        else if (content.mimetype.includes('ogg')) mediaExt = 'ogg';
+                                                        else if (content.mimetype.includes('pdf')) mediaExt = 'pdf';
+                                                }
+                                                if (content?.fileName) {
+                                                        const docExt = content.fileName.split('.').pop();
+                                                        if (docExt) mediaExt = docExt;
+                                                }
+
+                                                if (type === 'imageMessage') {
+                                                        await hisoka.sendMessage(target, { image: mediaBuffer, caption: headerText });
+                                                } else if (type === 'videoMessage') {
+                                                        await hisoka.sendMessage(target, { video: mediaBuffer, caption: headerText });
+                                                } else if (type === 'audioMessage') {
+                                                        await hisoka.sendMessage(target, { text: headerText });
+                                                        await hisoka.sendMessage(target, {
+                                                                audio: mediaBuffer,
+                                                                mimetype: content?.mimetype || 'audio/mpeg',
+                                                                ptt: content?.ptt || false,
+                                                        });
+                                                } else if (type === 'stickerMessage') {
+                                                        await hisoka.sendMessage(target, { text: headerText });
+                                                        await hisoka.sendMessage(target, { sticker: mediaBuffer });
+                                                } else if (type === 'documentMessage') {
+                                                        await hisoka.sendMessage(target, { text: headerText });
+                                                        await hisoka.sendMessage(target, {
+                                                                document: mediaBuffer,
+                                                                mimetype: content?.mimetype || 'application/octet-stream',
+                                                                fileName: content?.fileName || `document.${mediaExt}`,
+                                                        });
+                                                }
+                                        } catch (sendErr) {
+                                                console.error('\x1b[31m[AntiDelete] Error sending media to', target, ':\x1b[39m', sendErr.message);
+                                                await hisoka.sendMessage(target, {
+                                                        text: headerText + '\n\n⚠️ _Media gagal dikirim_'
+                                                });
                                         }
-                                        
-                                        if (content?.fileName) {
-                                                const docExt = content.fileName.split('.').pop();
-                                                if (docExt) mediaExt = docExt;
-                                        }
-                                        
-                                        if (type === 'imageMessage') {
-                                                await hisoka.sendMessage(botNumber, {
-                                                        image: mediaBuffer,
-                                                        caption: headerText,
-                                                });
-                                        } else if (type === 'videoMessage') {
-                                                await hisoka.sendMessage(botNumber, {
-                                                        video: mediaBuffer,
-                                                        caption: headerText,
-                                                });
-                                        } else if (type === 'audioMessage') {
-                                                await hisoka.sendMessage(botNumber, { text: headerText });
-                                                await hisoka.sendMessage(botNumber, {
-                                                        audio: mediaBuffer,
-                                                        mimetype: content?.mimetype || 'audio/mpeg',
-                                                        ptt: content?.ptt || false,
-                                                });
-                                        } else if (type === 'stickerMessage') {
-                                                await hisoka.sendMessage(botNumber, { text: headerText });
-                                                await hisoka.sendMessage(botNumber, {
-                                                        sticker: mediaBuffer,
-                                                });
-                                        } else if (type === 'documentMessage') {
-                                                await hisoka.sendMessage(botNumber, { text: headerText });
-                                                await hisoka.sendMessage(botNumber, {
-                                                        document: mediaBuffer,
-                                                        mimetype: content?.mimetype || 'application/octet-stream',
-                                                        fileName: content?.fileName || `document.${mediaExt}`,
-                                                });
-                                        }
-                                        
-                                        logAntiDelete(senderName, typeName, isGroup, groupName);
-                                } catch (sendErr) {
-                                        console.error('\x1b[31m[AntiDelete] Error sending media:\x1b[39m', sendErr.message);
-                                        await hisoka.sendMessage(botNumber, { 
-                                                text: headerText + '\n\n⚠️ _Media gagal dikirim_' 
+                                } else {
+                                        await hisoka.sendMessage(target, {
+                                                text: headerText + '\n\n⚠️ _Media tidak dapat diunduh_'
                                         });
                                 }
-                        } else {
-                                await hisoka.sendMessage(botNumber, { 
-                                        text: headerText + '\n\n⚠️ _Media tidak dapat diunduh_' 
-                                });
-                                logAntiDelete(senderName, typeName, isGroup, groupName, true);
+                        } catch (err) {
+                                console.error('\x1b[31m[AntiDelete] Error send to target', target, ':\x1b[39m', err.message);
                         }
-                } else {
-                        await hisoka.sendMessage(botNumber, { text: headerText });
-                        logAntiDelete(senderName, typeName, isGroup, groupName);
                 }
+
+                logAntiDelete(senderName, typeName, isGroup, groupName, sendTo);
                 
         } catch (err) {
                 console.error('\x1b[31m[AntiDelete] Error:\x1b[39m', err);
         }
 }
 
-function logAntiDelete(senderName, typeName, isGroup, groupName, failed = false) {
+function logAntiDelete(senderName, typeName, isGroup, groupName, sendTo = 'self') {
         const cyan = '\x1b[36m';
         const yellow = '\x1b[33m';
         const green = '\x1b[32m';
-        const red = '\x1b[31m';
-        const white = '\x1b[37m';
         const reset = '\x1b[0m';
         const bold = '\x1b[1m';
         
         const location = isGroup ? `Grup "${groupName}"` : 'Chat Pribadi';
-        const status = failed ? `${red}⚠️ Gagal${reset}` : `${green}✅ Tersimpan${reset}`;
+        const dest = sendTo === 'self' ? 'Saved Messages' : sendTo === 'chat' ? 'Chat Asal' : 'Keduanya';
         
-        console.log(`${cyan}[AntiDelete]${reset} ${yellow}${typeName}${reset} dari ${bold}${senderName}${reset} @ ${location} - ${status}`);
+        console.log(`${cyan}[AntiDelete]${reset} ${yellow}${typeName}${reset} dari ${bold}${senderName}${reset} @ ${location} → ${green}${dest}${reset}`);
 }
