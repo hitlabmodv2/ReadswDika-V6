@@ -7285,10 +7285,11 @@
     "lid": "26126739058932@lid"
   },
   "6282216501151@s.whatsapp.net": {
+    "id": "179469553770631@lid",
+    "lid": "179469553770631@lid",
     "isContact": true,
-    "id": "6282216501151@s.whatsapp.net",
     "name": "Saepul ( Teman Smk )",
-    "lid": "179469553770631@lid"
+    "notify": "saepulfariz"
   },
   "62882022053726@s.whatsapp.net": {
     "isContact": true,
@@ -26727,7 +26728,7 @@
     "imgUrl": "changed"
   },
   "6289688206739@s.whatsapp.net": {
-    "id": "6289688206739@s.whatsapp.net",
+    "id": "81582920577063@lid",
     "lid": "81582920577063@lid",
     "notify": "Wily",
     "ephemeralSettingTimestamp": 1765778951,
@@ -26937,8 +26938,8 @@
   "6289681008411@s.whatsapp.net": {
     "id": "274255723921630@lid",
     "lid": "274255723921630@lid",
-    "ephemeralSettingTimestamp": 1765714640,
-    "ephemeralDuration": 604800,
+    "ephemeralSettingTimestamp": 1765778951,
+    "ephemeralDuration": 86400,
     "imgUrl": "changed"
   },
   "9444717027354@lid": {

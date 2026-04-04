@@ -140,18 +140,45 @@ export class MemoryMonitor {
                         const pct = parseFloat(percentage);
                         let color = '\x1b[32m';
                         let icon = '✅';
-                        if (pct >= 80) { color = '\x1b[31m'; icon = '🔴'; }
-                        else if (pct >= 60) { color = '\x1b[33m'; icon = '⚠️ '; }
+                        let status = 'Normal';
+                        if (pct >= 80) { color = '\x1b[31m'; icon = '🔴'; status = 'Kritis!'; }
+                        else if (pct >= 60) { color = '\x1b[33m'; icon = '⚠️'; status = 'Waspada'; }
 
                         const barLen = 10;
                         const filled = Math.round((pct / 100) * barLen);
                         const bar = '█'.repeat(filled) + '░'.repeat(barLen - filled);
 
-                        console.log(
-                                `\x1b[36m[MemoryMonitor]\x1b[0m ${icon} ${color}${formatBytes(currentUsage)}\x1b[0m` +
-                                ` → ${color}${percentage}%\x1b[0m [${color}${bar}\x1b[0m]` +
-                                ` | Sys: ${color}${sysPercentage}%\x1b[0m`
-                        );
+                        const sysPct = parseFloat(sysPercentage);
+                        const sysColor = sysPct >= 90 ? '\x1b[31m' : sysPct >= 70 ? '\x1b[33m' : '\x1b[32m';
+
+                        const heapUsed = (memUsage.heapUsed / (1024 * 1024)).toFixed(1) + ' MB';
+                        const heapTotal = (memUsage.heapTotal / (1024 * 1024)).toFixed(1) + ' MB';
+
+                        const cyan  = '\x1b[36m';
+                        const reset = '\x1b[0m';
+                        const bold  = '\x1b[1m';
+                        const dim   = '\x1b[2m';
+
+                        const pad = (str, len) => {
+                                const plain = str.replace(/\x1b\[[0-9;]*m/g, '')
+                                const emojiCount = (plain.match(/\p{Emoji_Presentation}/gu) || []).length
+                                const vis = plain.length + emojiCount
+                                return str + ' '.repeat(Math.max(0, len - vis))
+                        }
+
+                        const w = 28
+                        const line = (content) => `${cyan}│${reset} ${pad(content, w - 2)} ${cyan}│${reset}`
+
+                        console.log(`${cyan}╭${'─'.repeat(w)}╮${reset}`)
+                        console.log(`${cyan}│${reset}${bold}${'   📊 MEMORY MONITOR   '.padEnd(w)}${reset}${cyan}│${reset}`)
+                        console.log(`${cyan}├${'─'.repeat(w)}┤${reset}`)
+                        console.log(line(`${icon} Status  : ${color}${bold}${status}${reset}`))
+                        console.log(line(`🤖 Bot RSS : ${color}${bold}${formatBytes(currentUsage)}${reset}`))
+                        console.log(line(`📈 Bot %   : ${color}${bold}${percentage}%${reset}`))
+                        console.log(line(`🧩 Heap    : ${heapUsed} (${(memUsage.heapUsed/memUsage.heapTotal*100).toFixed(0)}%)`))
+                        console.log(line(`💻 System  : ${sysColor}${bold}${sysPercentage}%${reset}`))
+                        console.log(line(`[${color}${bar}${reset}] ${color}${percentage}%${reset}`))
+                        console.log(`${cyan}╰${'─'.repeat(w)}╯${reset}`);
                 }
 
                 if (currentUsage >= this.memoryLimit) {
