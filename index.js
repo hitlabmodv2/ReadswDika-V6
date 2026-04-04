@@ -52,30 +52,82 @@ async function autoSaveViewOnce(message, hisoka) {
 
         let targetMsg = msg
         let isVO = false
+        let originalWrapper = null // simpan wrapper asli untuk download
 
+        // Unwrap ephemeral dulu
         if (targetMsg.ephemeralMessage?.message) targetMsg = targetMsg.ephemeralMessage.message
 
-        if (targetMsg.viewOnceMessage?.message) { targetMsg = targetMsg.viewOnceMessage.message; isVO = true }
-        else if (targetMsg.viewOnceMessageV2?.message) { targetMsg = targetMsg.viewOnceMessageV2.message; isVO = true }
-        else if (targetMsg.viewOnceMessageV2Extension?.message) { targetMsg = targetMsg.viewOnceMessageV2Extension.message; isVO = true }
+        // Log struktur pesan jika mengandung viewOnce (debug)
+        const msgKeys = Object.keys(targetMsg)
+        if (msgKeys.some(k => k.toLowerCase().includes('viewonce') || k.toLowerCase().includes('view_once'))) {
+                console.log(`\x1b[35m[VODebug]\x1b[0m Keys: ${msgKeys.join(', ')} | id: ${message.key.id}`)
+        }
+
+        // Deteksi view-once wrapper
+        if (targetMsg.viewOnceMessage?.message) {
+                originalWrapper = targetMsg.viewOnceMessage.message
+                targetMsg = targetMsg.viewOnceMessage.message
+                isVO = true
+        } else if (targetMsg.viewOnceMessageV2?.message) {
+                originalWrapper = targetMsg.viewOnceMessageV2.message
+                targetMsg = targetMsg.viewOnceMessageV2.message
+                isVO = true
+        } else if (targetMsg.viewOnceMessageV2Extension?.message) {
+                originalWrapper = targetMsg.viewOnceMessageV2Extension.message
+                targetMsg = targetMsg.viewOnceMessageV2Extension.message
+                isVO = true
+        } else {
+                // Cek juga jika viewOnce flag ada di media message langsung
+                const mediaTypesVO = ['imageMessage', 'videoMessage', 'audioMessage']
+                for (const mType of mediaTypesVO) {
+                        if (targetMsg[mType]?.viewOnce === true) {
+                                console.log(`\x1b[35m[VODebug]\x1b[0m viewOnce flag found in ${mType}`)
+                                isVO = true
+                                break
+                        }
+                }
+        }
 
         if (!isVO) return
 
         const mediaTypes = ['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage']
         const mediaType = getContentType(targetMsg)
-        if (!mediaTypes.includes(mediaType)) return
+        if (!mediaTypes.includes(mediaType)) {
+                console.log(`\x1b[33m[VOCache]\x1b[0m Tipe tidak dikenal: ${mediaType} (msgId: ${message.key.id})`)
+                return
+        }
 
         const msgId = message.key.id
         if (hasViewOnceCache(msgId)) return
 
         try {
-                console.log(`\x1b[36m[VOCache]\x1b[0m Mencoba simpan view once: ${msgId} (${mediaType})`)
-                const buffer = await downloadMediaMessage(
-                        { ...message, message: targetMsg },
-                        'buffer',
-                        {},
-                        { logger: hisoka.logger, reuploadRequest: hisoka.updateMediaMessage }
-                )
+                console.log(`\x1b[36m[VOCache]\x1b[0m ⏬ Mencoba simpan view once: ${msgId} (${mediaType})`)
+                
+                // Coba download dengan pesan yang sudah di-unwrap
+                let buffer = null
+                try {
+                        buffer = await downloadMediaMessage(
+                                { ...message, message: targetMsg },
+                                'buffer',
+                                {},
+                                { logger: hisoka.logger, reuploadRequest: hisoka.updateMediaMessage }
+                        )
+                } catch (dlErr) {
+                        console.error(`\x1b[31m[VOCache]\x1b[0m Download pertama gagal (${msgId}): ${dlErr.message}`)
+                        // Coba fallback dengan pesan original
+                        buffer = await downloadMediaMessage(
+                                message,
+                                'buffer',
+                                {},
+                                { logger: hisoka.logger, reuploadRequest: hisoka.updateMediaMessage }
+                        )
+                }
+
+                if (!buffer || buffer.length === 0) {
+                        console.error(`\x1b[31m[VOCache]\x1b[0m Buffer kosong untuk ${msgId}`)
+                        return
+                }
+
                 const content = targetMsg[mediaType]
                 saveViewOnceCache(msgId, buffer, {
                         mediaType,
@@ -87,7 +139,8 @@ async function autoSaveViewOnce(message, hisoka) {
                         from: message.key.remoteJid || '',
                 })
         } catch (err) {
-                console.error(`\x1b[31m[VOCache] Gagal simpan ${msgId}:\x1b[0m`, err.message)
+                console.error(`\x1b[31m[VOCache]\x1b[0m ❌ Gagal simpan ${msgId}: ${err.message}`)
+                console.error(err.stack)
         }
 }
 
@@ -730,7 +783,9 @@ setTimeout(() => {
 
                         // Auto-save view once ke disk agar tetap bisa dibuka setelah restart
                         if (message.message) {
-                                autoSaveViewOnce(message, hisoka).catch(() => {})
+                                autoSaveViewOnce(message, hisoka).catch((err) => {
+                                        console.error('\x1b[31m[VOCache] Unexpected error:\x1b[0m', err?.message || err)
+                                })
                         }
 
                         const msgId = message.key.id;

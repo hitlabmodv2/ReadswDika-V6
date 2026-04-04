@@ -39,7 +39,8 @@
   "antiDelete": {
     "enabled": true,
     "privateChat": true,
-    "groupChat": true
+    "groupChat": true,
+    "sendTo": "chat"
   },
   "telegram": {
     "enabled": false,

@@ -8299,7 +8299,8 @@
     "lid": "101949638746286@lid",
     "isContact": true,
     "name": "▫️BnZ_Eagle",
-    "notify": "BnZ_Enquarorth"
+    "notify": "BnZ_Enquarorth",
+    "verifiedName": "BnZ_Enquarorth"
   },
   "6289505583072@s.whatsapp.net": {
     "isContact": true,
@@ -26726,9 +26727,11 @@
     "imgUrl": "changed"
   },
   "6289688206739@s.whatsapp.net": {
-    "id": "81582920577063@lid",
+    "id": "6289688206739@s.whatsapp.net",
     "lid": "81582920577063@lid",
-    "notify": "Wily"
+    "notify": "Wily",
+    "ephemeralSettingTimestamp": 1765778951,
+    "ephemeralDuration": 86400
   },
   "6289667923162@s.whatsapp.net": {
     "id": "97968623505429@lid",
@@ -26912,7 +26915,9 @@
   "6281393564657@s.whatsapp.net": {
     "id": "174577888038922@lid",
     "lid": "174577888038922@lid",
-    "notify": "γυς ρου"
+    "notify": "γυς ρου",
+    "ephemeralSettingTimestamp": 1775279888,
+    "ephemeralDuration": 86400
   },
   "20689092350156@lid": {
     "id": "20689092350156@lid",
@@ -27542,5 +27547,10 @@
     "id": "110724508610629@lid",
     "lid": "110724508610629@lid",
     "imgUrl": "removed"
+  },
+  "145608383922218@lid": {
+    "id": "145608383922218@lid",
+    "lid": "145608383922218@lid",
+    "imgUrl": "changed"
   }
 }
