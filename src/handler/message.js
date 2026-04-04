@@ -561,6 +561,12 @@ ${readMore}
 │ ∘ .ytmp4
 ╰───────────────╯
 
+╭───〔 *Jadibot* 〕
+│ ∘ .jadibot <nomor>
+│ ∘ .stopjadibot <nomor>
+│ ∘ .listjadibot
+╰───────────────╯
+
 ╭───〔 *Owner* 〕
 │ ∘ .listowner
 │ ∘ .addowner
@@ -3314,22 +3320,47 @@ text += `╰═════════════════╯`;
                                 if (!isMainBot(hisoka)) return;
                                 if (!m.isOwner) return;
 
-                        const args = m.text.trim().split(/\s+/);
-                        let number = args[1]?.replace(/[^0-9]/g, '');
+                                let number = (query || '').replace(/[^0-9]/g, '');
 
                                 if (!number)
-                                        return await m.reply('❌ Contoh: .jadibot 628xxxxxxxxxx');
+                                        return await m.reply(
+                                                `╔══════════════════════╗\n` +
+                                                `║   🤖  *J A D I B O T*  ║\n` +
+                                                `╚══════════════════════╝\n\n` +
+                                                `❌ Nomor tidak boleh kosong!\n\n` +
+                                                `📌 *Cara pakai:*\n` +
+                                                `*.jadibot 628xxxxxxxxxx*\n\n` +
+                                                `Contoh: *.jadibot 6281234567890*`
+                                        );
 
                                 if (number.startsWith('08'))
                                         number = '62' + number.slice(1);
 
                                 if (jadibotMap.has(number))
-                                        return await m.reply('🤖 Jadibot sudah aktif.');
+                                        return await m.reply(
+                                                `╔══════════════════════╗\n` +
+                                                `║   🤖  *J A D I B O T*  ║\n` +
+                                                `╚══════════════════════╝\n\n` +
+                                                `⚠️ Nomor *+${number}* sudah aktif sebagai jadibot.\n\n` +
+                                                `💡 Ketik *.listjadibot* untuk lihat semua yang aktif.`
+                                        );
+
+                                const mainNum = hisoka.mainBotNumber
+                                        || hisoka.user?.id?.split(':')[0]
+                                        || '';
+
+                                await m.reply(
+                                        `╔══════════════════════╗\n` +
+                                        `║   🤖  *J A D I B O T*  ║\n` +
+                                        `╚══════════════════════╝\n\n` +
+                                        `⏳ Sedang menghubungkan *+${number}*...\n` +
+                                        `Kode pairing akan segera dikirim.`
+                                );
 
                                 await startJadibot(
                                         number,
                                         (text) => m.reply(text),
-                                        hisoka.mainBotNumber   // 🔥 INI YANG WAJIB ADA
+                                        mainNum
                                 );
                         }
                                 break;
@@ -3338,11 +3369,18 @@ text += `╰═════════════════╯`;
                                 if (!isMainBot(hisoka)) return;
                                 if (!m.isOwner) return;
 
-                        const args = m.text.trim().split(/\s+/);
-                        let number = args[1]?.replace(/[^0-9]/g, '');
+                                let number = (query || '').replace(/[^0-9]/g, '');
 
                                 if (!number)
-                                        return await m.reply('❌ Contoh: .stopjadibot 628xxxxxxxxxx');
+                                        return await m.reply(
+                                                `╔══════════════════════╗\n` +
+                                                `║  🛑  *STOP JADIBOT*  ║\n` +
+                                                `╚══════════════════════╝\n\n` +
+                                                `❌ Nomor tidak boleh kosong!\n\n` +
+                                                `📌 *Cara pakai:*\n` +
+                                                `*.stopjadibot 628xxxxxxxxxx*\n\n` +
+                                                `💡 Ketik *.listjadibot* untuk lihat nomor aktif.`
+                                        );
 
                                 if (number.startsWith('08'))
                                         number = '62' + number.slice(1);

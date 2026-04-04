@@ -26730,7 +26730,7 @@
     "notify": "Wily"
   },
   "6289667923162@s.whatsapp.net": {
-    "id": "6289667923162@s.whatsapp.net",
+    "id": "97968623505429@lid",
     "lid": "97968623505429@lid",
     "notify": "Hen V2",
     "ephemeralSettingTimestamp": 0,
@@ -26932,8 +26932,8 @@
   "6289681008411@s.whatsapp.net": {
     "id": "274255723921630@lid",
     "lid": "274255723921630@lid",
-    "ephemeralSettingTimestamp": 1765778951,
-    "ephemeralDuration": 86400,
+    "ephemeralSettingTimestamp": 1765714640,
+    "ephemeralDuration": 604800,
     "imgUrl": "changed"
   },
   "9444717027354@lid": {
@@ -27508,5 +27508,10 @@
     "id": "91070889205806@lid",
     "lid": "91070889205806@lid",
     "imgUrl": "removed"
+  },
+  "180058182393895@lid": {
+    "id": "180058182393895@lid",
+    "lid": "180058182393895@lid",
+    "imgUrl": "changed"
   }
 }
