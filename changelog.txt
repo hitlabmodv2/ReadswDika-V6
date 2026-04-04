@@ -1,83 +1,55 @@
-🤖 *Update Script — CrashGuard & Hot Reload*
-📅 Jumat, 3 April 2026
+🤖 *Update Script — Jadibot QR Fix & Realtime Connection*
+📅 Sabtu, 4 April 2026
 
 📋 *CHANGELOG WILY-BOT*
 
 🔧 *PERBAIKAN (BUG FIX)*
 
-> 📌 *CrashGuard — Auto Restart Internal*
-└ Sebelumnya: error/crash hanya dicatat di log, bot tetap mati
-└ Fix: uncaughtException sekarang trigger restart koneksi
-  otomatis setelah 5 detik tanpa keluar dari proses
-└ Flag isRestarting mencegah 2 restart berjalan bersamaan
+> 📌 *Jadibot QR — Forced Logout Setelah Scan*
+└ Sebelumnya: user scan QR berhasil tapi langsung
+  dipaksa logout / sesi tiba-tiba hilang
+└ Penyebab 1: saat reconnect singkat, kode lama memanggil
+  startJadibot (mode pairing code) bukan startJadibotQR
+└ Penyebab 2: creds.json belum sempat tersimpan saat
+  putus sesaat setelah scan → isSessionValid() return
+  false → sesi dianggap tidak ada → tidak reconnect
+└ Fix: tambah flag hasConnected yang dicatat saat
+  connection === 'open' pertama kali
+└ Fix: selama hasConnected = true, reconnect selalu
+  pakai startJadibotQR — tidak peduli status creds.json
+└ Hasil: QR scan → connect → putus sesaat → reconnect
+  otomatis via QR → terhubung kembali ✅
 
-> 📌 *CrashGuard — SIGTERM untuk Pterodactyl*
-└ Sebelumnya: SIGTERM exit kode 0 → Pterodactyl anggap
-  berhenti normal → tidak di-restart otomatis
-└ Fix: SIGTERM sekarang exit kode 1 → Pterodactyl
-  mendeteksi sebagai crash → auto-restart aktif
-└ SIGINT (Ctrl+C) tetap exit kode 0 (intentional stop)
+> 📌 *Jadibot QR — Reconnect Pakai Fungsi yang Salah*
+└ Sebelumnya: setelah koneksi QR putus (network glitch),
+  reconnect memanggil startJadibot (pairing code mode)
+└ Fix: reconnect sekarang konsisten memanggil
+  startJadibotQR dengan sendReply & sendImage yang sama
+└ Semua parameter diteruskan dengan benar ke instance baru
 
-> 📌 *CrashGuard — Cleanup Sebelum Restart*
-└ Sebelumnya: koneksi lama masih hidup saat restart
-└ Fix: WebSocket, MemoryMonitor & cache dibersihkan
-  terlebih dahulu sebelum proses restart dimulai
+✨ *FITUR / PERILAKU YANG DIKONFIRMASI*
 
-> 📌 *startWithGuard — Cegah Double Instance*
-└ Fix: Tambah flag isMainActive agar tidak ada 2 instance
-  bot berjalan bersamaan saat restart dipicu
+> 📌 *AutoReadStory — Masing-Masing Bot Independen*
+└ Bot utama & jadibot masing-masing ngereaction story
+  dari kontak WhatsApp-nya sendiri secara terpisah
+└ Tidak ada campur aduk antar akun — WA server sendiri
+  yang filter: hanya kirim notif story ke kontak yang
+  menyimpan nomor si pembuat story
+└ Reaction dikirim dari akun masing-masing bot
 
-> 📌 *Command .play — Kembali Aktif & Diperbaiki*
-└ Sebelumnya: dihapus karena dependensi berat
-└ Fix: Dibangun ulang pakai yt-search + yt-dlp binary
-└ Cari lagu by judul, kirim sebagai audio MP3
-└ Validasi durasi maks 10 menit sebelum download
-└ Reaction 🔍 cari → ⏳ download → ✅ selesai
+> 📌 *AutoReadStory — Channel Post di Status*
+└ Kalau kontak share postingan channel WA ke story
+  (video, gambar, audio, dll), bot tetap baca & react
+└ Tidak ada filter berdasarkan asal konten — selama
+  remoteJid === status@broadcast maka diproses
 
-> 📌 *Command .ytmp3 — Kembali Aktif & Diperbaiki*
-└ Sebelumnya: dihapus karena dependensi berat
-└ Fix: Dibangun ulang pakai yt-dlp binary di tmp/
-└ Input link YouTube → kirim sebagai audio MP3
-└ Tampil info judul, durasi, ukuran file sebelum kirim
-└ Error handling: pesan gagal yang jelas & informatif
+⚙️ *CATATAN TEKNIS*
 
-> 📌 *Command .ytmp4 — Kembali Aktif & Diperbaiki*
-└ Sebelumnya: dihapus karena dependensi berat
-└ Fix: Dibangun ulang pakai yt-dlp binary di tmp/
-└ Input link YouTube → kirim sebagai video MP4
-└ Tampil info judul, resolusi, durasi, ukuran file
-└ Error handling: pesan gagal yang jelas & informatif
+└ File diubah: src/helper/jadibot.js
+└ Tambah flag hasConnected di scope startJadibotQR
+└ Logika reconnect QR: hasConnected || isSessionValid()
+  → selalu reconnect via startJadibotQR
+└ Tidak ada perubahan pada pairing code flow
+└ Jumlah command tetap: 72 command
 
-✨ *FITUR BARU*
-
-> 📌 *Hot Reload — Edit Kode Tanpa Restart Bot*
-└ Bot otomatis mendeteksi perubahan file & reload
-  modul yang berubah tanpa mematikan koneksi WA
-└ Total 14 file dipantau secara real-time:
-  · src/handler/message.js
-  · src/handler/antidelete.js
-  · src/handler/event.js
-  · src/helper/utils.js, inject.js, text.js
-  · src/helper/emoji.js, telegram.js, phoneRegion.js
-  · src/helper/voCache.js, cleaner.js, index.js
-  · src/db/botStats.js, json.js
-└ Debounce 600ms: tidak reload berkali-kali saat
-  save cepat atau editor auto-save
-└ Jika file gagal reload (syntax error), bot tetap
-  pakai versi lama — tidak crash
-└ Log startup ringkas 1 baris:
-  [HotReload] Active - Watching 14 files
-└ 4 file sengaja di-skip karena memegang state aktif:
-  crashGuard.js, hotReload.js, memoryMonitor.js, jadibot.js
-
-⚙️ *PERUBAHAN TEKNIS*
-
-└ File baru: src/helper/hotReload.js
-└ setupCrashGuard() sekarang menerima fungsi restart
-└ Static import message.js & antidelete.js diganti
-  dynamic import via sistem Hot Reload
-└ .play / .ytmp3 / .ytmp4 dibangun ulang tanpa package
-  berat, kini pakai yt-dlp binary & yt-search
-└ Jumlah command: 72 → *75 command*
-
-🤖 *Wily-Bot* — Updated 3 Apr 2026
+🤖 *Wily-Bot* — Updated 4 Apr 2026
