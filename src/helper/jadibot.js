@@ -15,6 +15,7 @@ import { getRandomEmoji } from '../helper/emoji.js'
 import { injectClient } from '../helper/inject.js'
 import messageHandler from '../handler/message.js'
 import JSONDB from '../db/json.js'
+import { cleanStaleSessionFiles } from './cleaner.js'
 
 /* ================= LOGGER ================= */
 const silentLogger = pino({ level: 'silent' })
@@ -157,6 +158,9 @@ async function startJadibot(number, sendReply, mainBotNumber) {
   const sessionDir = path.join(process.cwd(), 'jadibot', number)
 
   fs.mkdirSync(sessionDir, { recursive: true })
+
+  // Bersihkan pre-key stale & session lama sebelum load
+  cleanStaleSessionFiles(sessionDir)
 
   const { state, saveCreds } = await useMultiFileAuthState(sessionDir)
   const { version } = await fetchLatestBaileysVersion()
