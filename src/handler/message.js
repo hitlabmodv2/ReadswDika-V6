@@ -3426,25 +3426,26 @@ text += `╰═════════════════╯`;
 
                                                 if (ppUrl) {
                                                         try {
-                                                                sentInfo = await hisoka.sendMessage(m.from, {
+                                                                // Kirim foto profil + info sebagai gambar
+                                                                await hisoka.sendMessage(m.from, {
                                                                         image: { url: ppUrl },
-                                                                        caption: captionText,
-                                                                        footer: footerText,
-                                                                        buttons: [{
-                                                                                buttonId: fmt,
-                                                                                buttonText: { displayText: `📋 Salin Kode: ${fmt}` }
-                                                                        }],
-                                                                        headerType: 4
+                                                                        caption: captionText
                                                                 }, { quoted: m })
                                                         } catch {
                                                                 ppUrl = null
                                                         }
                                                 }
 
-                                                if (!ppUrl) {
+                                                // Kirim tombol salin kode (cta_copy) — selalu dikirim agar bisa salin otomatis
+                                                try {
                                                         sentInfo = await m.reply({
                                                                 interactiveMessage: {
-                                                                        title: captionText,
+                                                                        title:
+                                                                                `🔑 *Kode Pairing:*\n\n` +
+                                                                                `┌─────────────────┐\n` +
+                                                                                `│   *${fmt}*   │\n` +
+                                                                                `└─────────────────┘\n\n` +
+                                                                                `⏳ Berlaku *3 menit*`,
                                                                         footer: footerText,
                                                                         buttons: [{
                                                                                 name: 'cta_copy',
@@ -3455,6 +3456,10 @@ text += `╰═════════════════╯`;
                                                                         }]
                                                                 }
                                                         })
+                                                } catch {
+                                                        sentInfo = await m.reply(
+                                                                `🔑 *Kode Pairing:*\n\n\`\`\`${fmt}\`\`\`\n\n👆 Ketuk tahan teks kode lalu *Salin*`
+                                                        )
                                                 }
 
                                                 if (sentInfo?.key) {
