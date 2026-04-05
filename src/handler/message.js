@@ -3409,23 +3409,20 @@ text += `╰═════════════════╯`;
                                                                                 `║   🤖  *J A D I B O T*   ║\n` +
                                                                                 `╚══════════════════════╝\n\n` +
                                                                                 `📱 *Nomor:* ${masked}\n\n` +
-                                                                                `🔑 *Kode Pairing:*\n` +
-                                                                                `┌─────────────────┐\n` +
-                                                                                `│   *${fmt}*   │\n` +
-                                                                                `└─────────────────┘\n\n` +
-                                                                                `📋 *Cara Memasukkan Kode:*\n\n` +
-                                                                                `1️⃣ Buka *WhatsApp* di HP kamu\n` +
-                                                                                `2️⃣ Ketuk ⋮ → *Perangkat Tertaut*\n` +
-                                                                                `3️⃣ Ketuk *Tautkan Perangkat*\n` +
-                                                                                `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
-                                                                                `5️⃣ Masukkan kode pairing di atas\n\n` +
+                                                                                `📋 *Cara Memasukkan Kode Pairing:*\n\n` +
+                                                                                `1️⃣ Ketuk tombol *"Salin Kode"* di bawah\n` +
+                                                                                `2️⃣ Buka *WhatsApp* → ketuk ⋮ (titik tiga)\n` +
+                                                                                `3️⃣ Pilih *Perangkat Tertaut*\n` +
+                                                                                `4️⃣ Ketuk *Tautkan Perangkat*\n` +
+                                                                                `5️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
+                                                                                `6️⃣ Masukkan kode yang sudah disalin\n\n` +
                                                                                 `⏳ Kode berlaku *3 menit*\n` +
                                                                                 `⚠️ Gagal? Ketik *.jadibot* lagi`,
-                                                                        footer: footerText,
+                                                                        footer: `📲 Salin kode lalu masukkan di WhatsApp · +${num}`,
                                                                         buttons: [{
                                                                                 name: 'cta_copy',
                                                                                 buttonParamsJson: JSON.stringify({
-                                                                                        display_text: '📋 Salin Kode Pairing',
+                                                                                        display_text: '🔑 Salin Kode Pairing Jadibot',
                                                                                         copy_code: fmt
                                                                                 })
                                                                         }]
