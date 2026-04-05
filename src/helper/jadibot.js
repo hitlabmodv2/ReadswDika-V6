@@ -84,6 +84,19 @@ function msgPairingCode(code, number) {
   )
 }
 
+function msgCopyCode(code) {
+  const formatted = formatPairingCode(code)
+  return (
+    `╔══〔 📋 *SALIN KODE* 〕══╗\n` +
+    `\n` +
+    `\`\`\`${formatted}\`\`\`\n` +
+    `\n` +
+    `╚══════════════════════╝\n` +
+    `👆 *Ketuk tahan* teks kode di atas\n` +
+    `lalu pilih *Salin* untuk menyalinnya`
+  )
+}
+
 function msgPairingExpired(number) {
   const masked = maskNumber(number)
   return (
@@ -234,6 +247,8 @@ async function startJadibot(number, sendReply, mainBotNumber) {
           try {
             const code = await sock.requestPairingCode(number)
             await sendReply(msgPairingCode(code, number))
+            await delay(800)
+            await sendReply(msgCopyCode(code))
             break
           } catch (err) {
             retries--
