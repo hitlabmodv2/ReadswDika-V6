@@ -15,7 +15,9 @@
 
 import fs from 'fs';
 import path from 'path';
-import { jidNormalizedUser, toNumber, jidDecode, proto, isPnUser, isJidGroup, delay } from 'socketon';
+import { createRequire } from 'module';
+const _require = createRequire(import.meta.url);
+const { jidNormalizedUser, toNumber, jidDecode, proto, isPnUser, isJidGroup, delay } = _require('socketon');
 
 import { telegram } from '../helper/index.js';
 import { isNumber } from '../helper/text.js';

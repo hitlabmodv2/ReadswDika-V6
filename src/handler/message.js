@@ -16,7 +16,9 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { isJidGroup, downloadMediaMessage, getContentType } from 'socketon';
+import { createRequire } from 'module';
+const _require = createRequire(import.meta.url);
+const { isJidGroup, downloadMediaMessage, getContentType } = _require('socketon');
 import { exec } from 'child_process';
 import util from 'util';
 

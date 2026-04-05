@@ -13,7 +13,9 @@
 
 'use strict';
 
-import {
+import { createRequire } from 'module';
+const _require = createRequire(import.meta.url);
+const {
         areJidsSameUser,
         generateWAMessageFromContent,
         getContentType,
@@ -25,7 +27,7 @@ import {
         jidNormalizedUser,
         downloadMediaMessage,
         generateMessageIDV2,
-} from 'socketon';
+} = _require('socketon');
 import fs from 'fs';
 import path from 'path';
 

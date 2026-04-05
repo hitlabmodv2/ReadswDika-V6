@@ -9,7 +9,9 @@
 
 import fs from 'fs';
 import path from 'path';
-import { jidNormalizedUser, jidDecode, isJidGroup, isPnUser, getContentType, downloadMediaMessage } from 'socketon';
+import { createRequire } from 'module';
+const _require = createRequire(import.meta.url);
+const { jidNormalizedUser, jidDecode, isJidGroup, isPnUser, getContentType, downloadMediaMessage } = _require('socketon');
 import { getTmpPath } from '../helper/cleaner.js';
 
 function loadConfig() {

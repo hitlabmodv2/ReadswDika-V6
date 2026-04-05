@@ -14,7 +14,10 @@
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
-import makeWASocket, {
+import { createRequire } from 'module';
+const _require = createRequire(import.meta.url);
+const {
+        default: makeWASocket,
         delay,
         useMultiFileAuthState,
         DisconnectReason,
@@ -27,7 +30,7 @@ import makeWASocket, {
         jidDecode,
         downloadMediaMessage,
         getContentType,
-} from 'socketon';
+} = _require('socketon');
 import pino from 'pino';
 import { Boom } from '@hapi/boom';
 import qrcode from 'qrcode-terminal';
@@ -361,7 +364,7 @@ async function main() {
                                 creds: state.creds,
                                 keys: makeCacheableSignalKeyStore(state.keys, silentLogger),
                         },
-                        browser: Browsers.macOS('Chrome'), // ini baru
+                        browser: Browsers('Chrome'), // socketon: Browsers(browserName)
                         generateHighQualityLinkPreview: true,
                         syncFullHistory: true, // ini bisa true false
                         keepAliveIntervalMs: 30000, // ini baru

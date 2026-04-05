@@ -13,7 +13,9 @@
 
 import fs from 'fs';
 import path from 'path';
-import { extractMessageContent, getContentType } from 'socketon';
+import { createRequire } from 'module';
+const _require = createRequire(import.meta.url);
+const { extractMessageContent, getContentType } = _require('socketon');
 
 const configPath = path.join(process.cwd(), 'config.json');
 

@@ -1,12 +1,15 @@
 'use strict'
 
-import makeWASocket, {
+import { createRequire } from 'module';
+const _require = createRequire(import.meta.url);
+const {
+  default: makeWASocket,
   useMultiFileAuthState,
   fetchLatestBaileysVersion,
   DisconnectReason,
   jidNormalizedUser,
   delay
-} from 'socketon'
+} = _require('socketon');
 
 import fs from 'fs'
 import path from 'path'
