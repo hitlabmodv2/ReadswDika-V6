@@ -6,7 +6,7 @@ import makeWASocket, {
   DisconnectReason,
   jidNormalizedUser,
   delay
-} from 'baileys'
+} from 'socketon'
 
 import fs from 'fs'
 import path from 'path'

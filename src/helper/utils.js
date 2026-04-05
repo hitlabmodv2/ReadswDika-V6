@@ -13,7 +13,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { extractMessageContent, getContentType } from 'baileys';
+import { extractMessageContent, getContentType } from 'socketon';
 
 const configPath = path.join(process.cwd(), 'config.json');
 

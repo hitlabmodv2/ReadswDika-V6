@@ -27,7 +27,7 @@ import makeWASocket, {
         jidDecode,
         downloadMediaMessage,
         getContentType,
-} from 'baileys';
+} from 'socketon';
 import pino from 'pino';
 import { Boom } from '@hapi/boom';
 import qrcode from 'qrcode-terminal';

@@ -16,7 +16,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { isJidGroup, downloadMediaMessage, getContentType } from 'baileys';
+import { isJidGroup, downloadMediaMessage, getContentType } from 'socketon';
 import { exec } from 'child_process';
 import util from 'util';
 

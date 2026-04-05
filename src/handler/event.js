@@ -15,7 +15,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { jidNormalizedUser, toNumber, jidDecode, proto, isPnUser, isJidGroup, delay } from 'baileys';
+import { jidNormalizedUser, toNumber, jidDecode, proto, isPnUser, isJidGroup, delay } from 'socketon';
 
 import { telegram } from '../helper/index.js';
 import { isNumber } from '../helper/text.js';

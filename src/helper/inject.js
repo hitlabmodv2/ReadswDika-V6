@@ -25,7 +25,7 @@ import {
         jidNormalizedUser,
         downloadMediaMessage,
         generateMessageIDV2,
-} from 'baileys';
+} from 'socketon';
 import fs from 'fs';
 import path from 'path';
 

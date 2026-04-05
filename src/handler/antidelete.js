@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { jidNormalizedUser, jidDecode, isJidGroup, isPnUser, getContentType, downloadMediaMessage } from 'baileys';
+import { jidNormalizedUser, jidDecode, isJidGroup, isPnUser, getContentType, downloadMediaMessage } from 'socketon';
 import { getTmpPath } from '../helper/cleaner.js';
 
 function loadConfig() {
