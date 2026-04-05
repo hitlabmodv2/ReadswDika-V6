@@ -323,6 +323,13 @@ async function startJadibot(number, sendReply, mainBotNumber) {
 
       /* ===== RECONNECT NORMAL ===== */
       console.log(`[JADIBOT] ${number} reconnecting...`)
+      // Tutup socket lama DULU sebelum buat yang baru
+      // agar WA tidak kick socket lama dengan alasan loggedOut
+      // yang akan memicu penghapusan sesi secara salah
+      try {
+        sock.ev.removeAllListeners()
+        if (sock.ws) sock.ws.close()
+      } catch {}
       setTimeout(() => {
         startJadibot(number, sendReply, mainBotNumber)
       }, 3000)
@@ -446,6 +453,13 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber) {
       // (creds.json mungkin belum tersimpan tepat waktu sebelum disconnect sesaat)
       if (hasConnected || isSessionValid(sessionDir)) {
         console.log(`[JADIBOT QR] ${number} reconnecting via QR...`)
+        // Tutup socket lama DULU sebelum buat yang baru
+        // agar WA tidak kick socket lama dengan alasan loggedOut
+        // yang akan memicu penghapusan sesi secara salah
+        try {
+          sock.ev.removeAllListeners()
+          if (sock.ws) sock.ws.close()
+        } catch {}
         setTimeout(() => {
           startJadibotQR(number, sendReply, sendImage, mainBotNumber)
         }, 3000)
