@@ -316,7 +316,16 @@ CONTOH NYAMBUNG:
                       `⏳ Sedang menghubungkan *+${choiceData.number}*...\n` +
                       `Kode pairing akan segera dikirim.`
                     )
-                    await startJadibot(choiceData.number, (text) => m.reply(text), choiceData.mainNum)
+                    await startJadibot(
+                      choiceData.number,
+                      async (msg) => m.reply(msg),
+                      choiceData.mainNum,
+                      async (key, text) => {
+                        try {
+                          await hisoka.sendMessage(m.from, { edit: key, text })
+                        } catch {}
+                      }
+                    )
                   } else if (input === '2' || /qr/i.test(input)) {
                     pendingJadibotChoices.delete(m.quoted.key.id)
                     await m.reply(

@@ -88,7 +88,15 @@ function msgCopyCode(code) {
   const formatted = formatPairingCode(code)
   return {
     interactiveMessage: {
-      title: `🔑 *Kode Pairing:*\n\n*${formatted}*\n\n⏳ Berlaku *3 menit*`,
+      title:
+        `📋 *Cara Memasukkan Kode:*\n\n` +
+        `1️⃣ Buka WhatsApp di HP kamu\n` +
+        `2️⃣ Ketuk ⋮ (titik tiga) → *Perangkat Tertaut*\n` +
+        `3️⃣ Ketuk *Tautkan Perangkat*\n` +
+        `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
+        `5️⃣ Masukkan kode yang tertera di atas\n\n` +
+        `⏳ Berlaku *3 menit*\n` +
+        `⚠️ Jika gagal, ketik *.jadibot* ulang`,
       footer: 'Tap tombol di bawah untuk salin kode',
       buttons: [
         {
@@ -202,7 +210,7 @@ function msgLoggedOut(number, remainingList) {
 }
 
 /* ================= START JADIBOT ================= */
-async function startJadibot(number, sendReply, mainBotNumber) {
+async function startJadibot(number, sendReply, mainBotNumber, editMsg = null) {
   number = number.replace(/[^0-9]/g, '')
   const sessionDir = path.join(process.cwd(), 'jadibot', number)
 
@@ -235,6 +243,8 @@ async function startJadibot(number, sendReply, mainBotNumber) {
   sock.ev.on('creds.update', saveCreds)
 
   /* ================= CONNECTION ================= */
+  let pairingMsgKey = null
+
   sock.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
     const reason = lastDisconnect?.error?.output?.statusCode
 
@@ -252,7 +262,8 @@ async function startJadibot(number, sendReply, mainBotNumber) {
         while (retries > 0) {
           try {
             const code = await sock.requestPairingCode(number)
-            await sendReply(msgPairingCode(code, number))
+            const sentInfo = await sendReply(msgPairingCode(code, number))
+            if (sentInfo?.key) pairingMsgKey = sentInfo.key
             await delay(800)
             try {
               await sendReply(msgCopyCode(code))
@@ -323,6 +334,22 @@ async function startJadibot(number, sendReply, mainBotNumber) {
       }
 
       console.log(`[JADIBOT] ✅ ${number} CONNECTED`)
+
+      // Edit pesan pairing secara realtime → tandai sudah terhubung
+      if (pairingMsgKey && editMsg) {
+        try {
+          await editMsg(
+            pairingMsgKey,
+            `╔══════════════════════╗\n` +
+            `║   ✅  *J A D I B O T*  ║\n` +
+            `╚══════════════════════╝\n\n` +
+            `📱 *Nomor:* ${maskNumber(number)}\n\n` +
+            `🎉 *Kode berhasil digunakan!*\n` +
+            `Jadibot sudah terhubung dan aktif.\n\n` +
+            `✅ Pesan ini diperbarui otomatis saat terhubung.`
+          )
+        } catch {}
+      }
 
       // Kirim pesan sambutan rapih ke pengirim
       try {
