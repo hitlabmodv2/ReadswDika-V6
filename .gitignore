@@ -4,7 +4,17 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
-sessions/
 .upm
 package-lock.json
 tmp/
+
+# Sessions — folder ada tapi isinya dikosongkan
+sessions/**
+!sessions/
+!sessions/hisoka/
+!sessions/hisoka/.gitkeep
+
+# Jadibot — folder ada tapi isinya dikosongkan
+jadibot/**
+!jadibot/
+!jadibot/.gitkeep
