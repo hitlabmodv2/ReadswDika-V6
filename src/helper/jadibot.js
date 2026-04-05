@@ -102,6 +102,21 @@ function msgConnected(number) {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
+
+  const config = loadConfig()
+  const story = config.autoReadStory || {}
+  const storyOn = story.enabled !== false
+  const reactOn = storyOn && story.autoReaction !== false
+
+  let swStatus
+  if (!storyOn) {
+    swStatus = `❌ *AutoRead SW:* Nonaktif`
+  } else if (reactOn) {
+    swStatus = `✅ *AutoRead SW:* Aktif — Mode *Read + Reaction* 🎉`
+  } else {
+    swStatus = `✅ *AutoRead SW:* Aktif — Mode *Read Only* 👁️`
+  }
+
   return (
     `╔══════════════════════╗\n` +
     `║  ✅  *JADIBOT AKTIF*  ║\n` +
@@ -110,10 +125,20 @@ function msgConnected(number) {
     `🕐 *Waktu:* ${now} WIB\n\n` +
     `🎉 Jadibot berhasil terhubung!\n` +
     `Bot sudah siap menerima perintah.\n\n` +
-    `📌 *Perintah Penting:*\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `📊 *Status Fitur Otomatis:*\n` +
+    `${swStatus}\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+    `🛠️ *Fitur Jadibot:*\n` +
+    `• 👁️ Auto baca & reaction story/SW kontak\n` +
+    `• 🔕 Anti-delete pesan (jika aktif)\n` +
+    `• 🤖 Semua command bot bisa diakses\n` +
+    `   _(hanya oleh owner via bot utama)_\n\n` +
+    `📌 *Kontrol Jadibot (dari bot utama):*\n` +
     `• *.menu* — Lihat semua fitur\n` +
-    `• *.stopjadibot ${number}* — Matikan bot ini\n` +
-    `• *.listjadibot* — Lihat daftar bot aktif\n\n` +
+    `• *.readsw* — Kelola AutoRead SW\n` +
+    `• *.stopjadibot ${number}* — Matikan jadibot\n` +
+    `• *.listjadibot* — Daftar jadibot aktif\n\n` +
     `_Powered by Wily Bot_ 🤖`
   )
 }
