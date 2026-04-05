@@ -25,6 +25,7 @@ const WATCHED_FILES = [
     { key: 'voCache',      rel: 'src/helper/voCache.js' },
     { key: 'cleaner',      rel: 'src/helper/cleaner.js' },
     { key: 'helperIndex',  rel: 'src/helper/index.js' },
+    { key: 'socketCompat', rel: 'src/helper/socketCompat.js' },
 
     // ── Database helpers ─────────────────────────
     { key: 'botStats',     rel: 'src/db/botStats.js' },
