@@ -269,13 +269,13 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null) {
         while (retries > 0) {
           try {
             const code = await sock.requestPairingCode(number)
-            const sentInfo = await sendReply(msgPairingCode(code, number))
-            if (sentInfo?.key) pairingMsgKey = sentInfo.key
-            await delay(800)
             try {
-              await sendReply(msgCopyCode(code, number))
+              const sentInfo = await sendReply(msgCopyCode(code, number))
+              if (sentInfo?.key) pairingMsgKey = sentInfo.key
             } catch {
               const formatted = formatPairingCode(code)
+              const sentInfo = await sendReply(msgPairingCode(code, number))
+              if (sentInfo?.key) pairingMsgKey = sentInfo.key
               await sendReply(`📋 *Salin Kode:*\n\n\`\`\`${formatted}\`\`\`\n\n👆 Ketuk tahan teks kode lalu *Salin*`)
             }
             break
