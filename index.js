@@ -86,7 +86,7 @@ async function autoSaveViewOnce(message, hisoka) {
         const mediaTypes = ['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage']
         const mediaType = getContentType(targetMsg)
         if (!mediaTypes.includes(mediaType)) {
-                console.log(`\x1b[33m[VOCache]\x1b[0m Tipe tidak dikenal: ${mediaType} (msgId: ${message.key.id})`)
+                // interactiveMessage dan tipe non-media lainnya wajar muncul — skip saja tanpa log
                 return
         }
 
