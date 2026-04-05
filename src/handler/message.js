@@ -141,8 +141,9 @@ function isViewOnceMessage(quotedMsg) {
 }
 
 export default async function ({ message, type: messagesType }, hisoka) {
+        let m;
         try {
-                const m = await injectMessage(hisoka, message);
+                m = await injectMessage(hisoka, message);
 
                 if (!m || !m.message) return;
 

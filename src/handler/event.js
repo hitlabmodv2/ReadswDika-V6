@@ -238,7 +238,9 @@ export default async function (m, hisoka) {
                                 ? Math.floor(Math.random() * (delayMaxMs - delayMinMs)) + delayMinMs
                                 : fixedDelayMs;
 
-                        const shouldReact = storyConfig.autoReaction !== false && reactStatus.length;
+                        const senderJid = m.sender || m.participant || m.key?.participant
+                        const hasSender = !!senderJid
+                        const shouldReact = storyConfig.autoReaction !== false && reactStatus.length && hasSender;
 
                         await new Promise(resolve => setTimeout(resolve, delayMs));
 
@@ -246,20 +248,20 @@ export default async function (m, hisoka) {
                         // 1. 'read'      → kirim ke poster agar mereka tahu story sudah dilihat
                         // 2. 'read-self' → sinkronisasi ke akun sendiri agar story tampil sudah dibaca
                         //                  di WhatsApp Web / HP kita (hilangkan tanda hijau/unread)
-                        // Gunakan m.sender (sudah resolved dari LID ke nomor HP) sebagai participant
-                        const resolvedParticipant = jidNormalizedUser(m.sender);
+                        // Gunakan sender yang sudah di-resolve sebagai participant
+                        const resolvedParticipant = hasSender ? jidNormalizedUser(senderJid) : undefined;
                         const storyKey = {
                                 ...m.key,
                                 remoteJid: 'status@broadcast',
-                                participant: resolvedParticipant,
+                                ...(resolvedParticipant && { participant: resolvedParticipant }),
                                 fromMe: false,
                         };
                         const readPromise = Promise.all([
                                 hisoka.sendReceipts([storyKey], 'read').catch(err => {
-                                        console.error('\x1b[31m[AutoRead] read failed:\x1b[39m', err.message);
+                                        console.error('\x1b[31m[AutoRead] read failed:\x1b[39m', err?.message || String(err));
                                 }),
                                 hisoka.sendReceipts([storyKey], 'read-self').catch(err => {
-                                        console.error('\x1b[31m[AutoRead] read-self failed:\x1b[39m', err.message);
+                                        console.error('\x1b[31m[AutoRead] read-self failed:\x1b[39m', err?.message || String(err));
                                 }),
                         ]);
 
@@ -269,10 +271,10 @@ export default async function (m, hisoka) {
                                         react: { key: m.key, text: usedReaction },
                                 },
                                 {
-                                        statusJidList: [jidNormalizedUser(hisoka.user.id), jidNormalizedUser(m.sender)],
+                                        statusJidList: [jidNormalizedUser(hisoka.user.id), jidNormalizedUser(senderJid)],
                                 }
                         ).catch((err) => {
-                                console.error('\x1b[31m[Reaction Error]\x1b[39m', err.message);
+                                console.error('\x1b[31m[Reaction Error]\x1b[39m', err?.message || String(err) || 'Unknown');
                                 usedReaction = '❌ Gagal';
                         }) : Promise.resolve();
 
