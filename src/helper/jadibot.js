@@ -251,6 +251,15 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
   /* ================= CONNECTION ================= */
   let pairingMsgKey = null
+  let aborted = false
+
+  function cleanupSocket() {
+    aborted = true
+    try {
+      sock.ev.removeAllListeners()
+      if (sock.ws) sock.ws.close()
+    } catch {}
+  }
 
   sock.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
     const reason = lastDisconnect?.error?.output?.statusCode
@@ -267,8 +276,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       setTimeout(async () => {
         let retries = 3
         while (retries > 0) {
+          if (aborted) break
           try {
             const code = await sock.requestPairingCode(number)
+            if (aborted) break
             if (sendPairingMsg) {
               const sentInfo = await sendPairingMsg(code, number)
               if (sentInfo?.key) pairingMsgKey = sentInfo.key
@@ -285,12 +296,13 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             }
             break
           } catch (err) {
+            if (aborted) break
             retries--
             console.error(`[JADIBOT] Gagal request pairing code ${number} (sisa retry: ${retries}):`, err?.message)
             if (retries > 0) await delay(2000)
           }
         }
-        if (retries === 0) {
+        if (!aborted && retries === 0) {
           try {
             await sendReply(
               `╔══════════════════════╗\n` +
@@ -314,10 +326,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         pairingTimeout.delete(number)
 
         // Tutup socket
-        try {
-          sock.ev.removeAllListeners()
-          if (sock.ws) sock.ws.close()
-        } catch {}
+        cleanupSocket()
 
         // Hapus sesi
         setTimeout(() => {
@@ -391,6 +400,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         // Hapus dari map DULU baru ambil sisa list (agar nomor ini tidak muncul di list)
         jadibotMap.delete(number)
 
+        // Hentikan semua listener & tutup socket → cegah ENOENT dari saveCreds
+        cleanupSocket()
+
         if (fs.existsSync(sessionDir)) {
           fs.rmSync(sessionDir, { recursive: true, force: true })
         }
@@ -417,14 +429,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       /* ===== RECONNECT NORMAL ===== */
       console.log(`[JADIBOT] ${number} reconnecting...`)
       // Tutup socket lama DULU sebelum buat yang baru
-      // agar WA tidak kick socket lama dengan alasan loggedOut
-      // yang akan memicu penghapusan sesi secara salah
-      try {
-        sock.ev.removeAllListeners()
-        if (sock.ws) sock.ws.close()
-      } catch {}
+      cleanupSocket()
       setTimeout(() => {
-        startJadibot(number, sendReply, mainBotNumber)
+        startJadibot(number, sendReply, mainBotNumber, editMsg, sendPairingMsg)
       }, 3000)
     }
   })
